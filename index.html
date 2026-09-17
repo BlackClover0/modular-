@@ -1,0 +1,1386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Worlds</title>
+<style>
+  :root{
+    --dusk-deep:#171225;
+    --dusk-mid:#302044;
+    --dusk-warm:#9f5f4d;
+    --amber:#e2ad68;
+    --amber-soft:#f0c98e;
+    --parchment:#f3eadb;
+    --muted:#b8aebf;
+    --panel:rgba(28,22,38,0.92);
+    --panel-soft:rgba(255,255,255,0.045);
+    --panel-edge:rgba(226,173,104,0.28);
+    --panel-edge-strong:rgba(226,173,104,0.48);
+    --danger:#d36a58;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:
+      radial-gradient(90% 55% at 8% -5%, rgba(226,173,104,0.12), transparent 62%),
+      radial-gradient(75% 45% at 100% 35%, rgba(112,78,145,0.10), transparent 65%),
+      linear-gradient(180deg, var(--dusk-deep) 0%, #151120 52%, #0f0c17 100%);
+    color:var(--parchment);
+    min-height:100dvh;
+    overflow-x:hidden;
+  }
+  .app{ max-width:520px; margin:0 auto; min-height:100dvh; display:flex; flex-direction:column; }
+  .screen{ display:none; flex-direction:column; min-height:100dvh; }
+  .screen.active{ display:flex; }
+
+  /* -------- header -------- */
+  .topbar{
+    display:flex; align-items:center; gap:10px;
+    padding:16px 16px 13px;
+    border-bottom:1px solid var(--panel-edge);
+    position:sticky; top:0; z-index:5;
+    background:rgba(20,16,29,0.86); backdrop-filter:blur(12px);
+    box-shadow:0 6px 24px rgba(0,0,0,0.16);
+  }
+  .topbar h1{
+    font-family:'Iowan Old Style','Palatino Linotype',Georgia,serif;
+    font-size:19px; margin:0; flex:1; letter-spacing:.01em; color:var(--parchment);
+  }
+  .icon-btn{
+    width:34px; height:34px; border-radius:50%;
+    background:var(--panel); border:1px solid var(--panel-edge);
+    color:var(--amber); font-size:16px; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; flex-shrink:0;
+  }
+  .back-btn{ font-size:18px; }
+
+  .content{ flex:1; padding:16px; overflow-y:auto; }
+
+  /* -------- home: world cards -------- */
+  .world-list{ display:flex; flex-direction:column; gap:12px; }
+  .world-card{
+    position:relative;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.035), transparent 55%),
+      var(--panel);
+    border:1px solid var(--panel-edge); border-radius:13px;
+    padding:16px; cursor:pointer;
+    display:flex; align-items:center; gap:12px;
+    box-shadow:0 7px 22px rgba(0,0,0,0.16);
+    transition:transform .18s ease, border-color .18s ease, background .18s ease;
+  }
+  .world-card:active{
+    transform:scale(.988);
+    border-color:var(--panel-edge-strong);
+  }
+  .world-card .glyph{
+    width:44px; height:44px; border-radius:50%; flex-shrink:0;
+    background:
+      radial-gradient(circle at 32% 28%, #fff8e9 0%, var(--amber-soft) 25%, var(--amber) 70%, #a9674e 100%);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Iowan Old Style',Georgia,serif; font-size:18px; color:#291d2b; font-weight:600;
+    box-shadow:0 4px 12px rgba(226,173,104,0.12);
+  }
+  .world-card .meta{ flex:1; min-width:0; }
+  .world-card .meta h3{
+    margin:0 0 4px; font-family:'Iowan Old Style',Georgia,serif; font-size:16.5px;
+    color:var(--parchment); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .world-card .meta p{ margin:0; font-size:12px; color:var(--muted); opacity:.72; }
+  .world-card .row-actions{ display:flex; gap:6px; flex-shrink:0; }
+  .mini-btn{
+    width:30px; height:30px; border-radius:8px;
+    background:rgba(226,173,104,0.07); border:1px solid var(--panel-edge);
+    color:var(--parchment); font-size:13px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition:background .18s ease, border-color .18s ease;
+  }
+  .mini-btn:active{
+    background:rgba(226,173,104,0.16);
+    border-color:var(--panel-edge-strong);
+  }
+  .mini-btn.danger{ color:var(--danger); }
+
+  .empty-state{
+    text-align:center; padding:60px 20px; color:rgba(239,227,206,0.5);
+    font-size:14px; line-height:1.6;
+  }
+  .empty-state .big{ font-size:34px; margin-bottom:10px; }
+
+  .fab{
+    position:fixed; left:50%; bottom:24px; transform:translateX(calc(-50% + 0px));
+    width:min(520px,100%); display:flex; justify-content:flex-end; padding:0 16px;
+    pointer-events:none;
+  }
+  .fab button{
+    pointer-events:auto;
+    width:56px; height:56px; border-radius:50%;
+    background:linear-gradient(180deg,var(--amber),var(--dusk-warm));
+    border:none; color:#241533; font-size:26px; font-weight:600;
+    box-shadow:0 8px 20px rgba(0,0,0,0.4);
+    cursor:pointer;
+  }
+
+  /* -------- forms -------- */
+  label.field-label{
+    display:block; font-size:12px; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--amber); margin:18px 0 6px;
+  }
+  label.field-label.first{ margin-top:0; }
+  input[type=text], textarea, select{
+    width:100%; background:rgba(255,255,255,0.045); border:1px solid var(--panel-edge);
+    border-radius:9px; padding:11px 12px; color:var(--parchment); font-size:14.5px;
+    font-family:inherit; resize:vertical; transition:border-color .18s ease, background .18s ease;
+  }
+  input[type=text]::placeholder, textarea::placeholder{ color:rgba(243,234,219,0.34); }
+  input[type=text]:focus, textarea:focus, select:focus{
+    outline:none; border-color:var(--amber);
+    background:rgba(226,173,104,0.055);
+    box-shadow:0 0 0 3px rgba(226,173,104,0.055);
+  }
+  textarea{ min-height:70px; line-height:1.5; }
+  select{ appearance:none; -webkit-appearance:none; }
+
+  .char-row{
+    display:flex; align-items:center; gap:10px; margin-bottom:10px;
+    background:rgba(255,255,255,0.03); border:1px solid var(--panel-edge);
+    border-radius:8px; padding:8px 10px;
+  }
+  .char-row .avatar{
+    width:36px; height:36px; border-radius:50%; object-fit:cover; flex-shrink:0;
+    background:rgba(255,255,255,0.06); border:1px solid var(--panel-edge);
+  }
+  .char-row input[type=text]{ flex:1; border:none; background:transparent; padding:4px 2px; }
+  .char-row .avatar-btn{ flex-shrink:0; }
+  .char-row .remove-char{ flex-shrink:0; color:rgba(239,227,206,0.4); font-size:18px; cursor:pointer; padding:0 4px; }
+  .user-toggle{
+    display:flex; flex-direction:column; align-items:center; gap:2px; flex-shrink:0;
+    font-size:9px; letter-spacing:.03em; text-transform:uppercase; color:rgba(239,227,206,0.5);
+  }
+  .user-toggle input{ width:auto; margin:0; accent-color:var(--amber); }
+  input[type=file]{ display:none; }
+
+  .ghost-btn{
+    width:100%; padding:10px; border-radius:8px; border:1px dashed var(--panel-edge);
+    background:transparent; color:var(--amber); font-size:13.5px; cursor:pointer; margin-top:4px;
+  }
+  .primary-btn{
+    width:100%; padding:13px; border-radius:9px; border:none;
+    background:linear-gradient(145deg,var(--amber-soft),var(--amber) 55%,var(--dusk-warm)); color:#24172b;
+    font-size:15px; font-weight:650; cursor:pointer; margin-top:22px;
+    box-shadow:0 7px 18px rgba(0,0,0,0.18);
+  }
+  .primary-btn:disabled{ opacity:0.4; }
+  .secondary-btn{
+    width:100%; padding:12px; border-radius:9px; border:1px solid var(--panel-edge);
+    background:rgba(255,255,255,0.035); color:var(--parchment); font-size:14px; cursor:pointer; margin-top:10px;
+  }
+  .hint-text{ font-size:11.5px; color:rgba(239,227,206,0.45); margin:4px 2px 0; line-height:1.5; }
+
+  /* -------- editor -------- */
+  .page-strip{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:10px; padding:12px 16px; border-bottom:1px solid var(--panel-edge);
+    background:rgba(20,12,18,0.6);
+  }
+  .page-strip .page-jump{ flex:1; }
+  .page-strip button{
+    background:var(--panel); border:1px solid var(--panel-edge); color:var(--amber);
+    width:34px; height:34px; border-radius:8px; font-size:16px; cursor:pointer;
+  }
+  .page-strip button:disabled{ opacity:0.3; }
+
+  .slot{
+    background:var(--panel); border:1px solid var(--panel-edge); border-radius:10px;
+    padding:14px; margin-bottom:14px;
+  }
+  .slot-title{
+    display:flex; align-items:center; gap:8px;
+    font-family:'Iowan Old Style',Georgia,serif; font-size:14.5px; color:var(--amber);
+    margin-bottom:10px;
+  }
+  .slot-title .num{
+    width:20px; height:20px; border-radius:50%; background:rgba(232,163,85,0.15);
+    display:flex; align-items:center; justify-content:center; font-size:11px; font-family:inherit;
+  }
+  .choice-block{
+    border-top:1px solid rgba(232,163,85,0.15); padding-top:10px; margin-top:10px;
+  }
+  .choice-block:first-child{ border-top:none; padding-top:0; margin-top:0; }
+  .choice-block .choice-label{ font-size:11.5px; color:rgba(239,227,206,0.6); margin-bottom:5px; }
+  .choice-row{ display:flex; gap:8px; }
+  .choice-row input[type=text]{ flex:1; }
+
+  /* -------- player (always landscape, one frame, no scroll) -------- */
+  .player-stage{
+    position:fixed; top:0; left:0; width:100vw; height:100dvh;
+    display:flex; flex-direction:column; overflow:hidden;
+    background:
+      radial-gradient(75% 65% at 8% 0%, rgba(226,173,104,0.13), transparent 58%),
+      radial-gradient(65% 70% at 95% 100%, rgba(89,65,124,0.14), transparent 62%),
+      linear-gradient(180deg, #171225 0%, #151120 48%, #0f0c17 100%);
+    z-index:10;
+  }
+  @media (orientation:portrait){
+    .player-stage{
+      top:50%; left:50%; width:100dvh; height:100vw;
+      transform:translate(-50%,-50%) rotate(90deg);
+    }
+  }
+
+  .player-header{
+    flex-shrink:0; display:flex; justify-content:space-between; align-items:center;
+    padding:8px calc(12px + env(safe-area-inset-top)) 8px 14px;
+    font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:rgba(239,227,206,0.35);
+    position:relative; z-index:20;
+  }
+  .progress-dots{ display:flex; align-items:center; gap:5px; }
+  .progress-dots .dot{
+    width:5.5px; height:5.5px; border-radius:50%; background:rgba(226,173,104,0.22);
+    transition:background .25s ease, transform .25s ease; transform:scale(1);
+  }
+  .progress-dots .dot.done{ background:var(--amber); transform:scale(1.3); }
+  .exit-btn{
+    background:rgba(20,14,27,0.86); border:1px solid var(--panel-edge); color:var(--parchment);
+    font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    padding:6px 13px; border-radius:20px; cursor:pointer; font-family:inherit; flex-shrink:0;
+    box-shadow:0 5px 16px rgba(0,0,0,0.2);
+  }
+
+  /* Ambient floating motes behind the scene, purely atmospheric. */
+  .ambient-particles{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
+  .ambient-particles .mote{
+    position:absolute; bottom:-6%; border-radius:50%;
+    background:radial-gradient(circle, rgba(240,201,142,0.85), rgba(240,201,142,0));
+    opacity:0; animation-name:mote-rise; animation-timing-function:ease-in;
+    animation-iteration-count:infinite;
+  }
+  @keyframes mote-rise{
+    0%{ transform:translateY(0) translateX(0); opacity:0; }
+    8%{ opacity:.55; }
+    92%{ opacity:.25; }
+    100%{ transform:translateY(-112vh) translateX(var(--drift,12px)); opacity:0; }
+  }
+
+  /* Quick warm pulse across the scene as a new page turns over. */
+  .page-flash{
+    position:absolute; inset:0; z-index:16; pointer-events:none;
+    background:radial-gradient(60% 60% at 50% 50%, rgba(240,201,142,0.16), rgba(240,201,142,0) 70%);
+    opacity:0; transition:opacity .55s ease;
+  }
+  .page-flash.show{ opacity:1; transition:opacity .12s ease; }
+
+  /* The play area is now a free-positioned chat scene.
+     The HTML structure stays unchanged; only the visual positioning changes. */
+  .player-main{
+    flex:1; min-height:0; position:relative; display:block; overflow:hidden; padding:0;
+  }
+
+  .duo{
+    position:absolute; inset:0;
+    display:block; min-height:0;
+    pointer-events:none;
+  }
+
+  /* Character model + dialogue are a single visual unit.
+     When a character exists, the model sits immediately to the LEFT of the bubble.
+     With no character/model, the bubble keeps its normal left-edge position. */
+  .char-wrap{
+    position:absolute; left:2%; top:50%;
+    width:15%; height:62%; max-width:170px;
+    transform:translate(-130%, -50%); opacity:0;
+    transition:opacity .35s ease, transform .5s cubic-bezier(.2,.75,.25,1);
+    pointer-events:none; z-index:4;
+    display:flex; align-items:flex-end; justify-content:center;
+  }
+  .char-wrap.in{ opacity:1; transform:translate(0, -50%); }
+  .sprite{
+    width:100%; height:100%; object-fit:contain; object-position:bottom center; display:block;
+    filter:drop-shadow(0 10px 14px rgba(0,0,0,0.48));
+  }
+
+  /* Default = narration/no model: bubble comes from the LEFT by itself.
+     It stays under half the screen width. */
+  .story-box{
+    position:absolute; left:2.2%; top:50%;
+    width:min(43%, 560px); height:auto; min-height:22%; max-height:62%;
+    transform:translate(-115%, -50%);
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.045), transparent 68%),
+      rgba(28,22,38,0.95);
+    border:1px solid var(--panel-edge-strong); border-radius:15px;
+    padding:14px 17px; display:flex; flex-direction:column; justify-content:center;
+    overflow-y:auto; scrollbar-width:none;
+    box-shadow:0 12px 32px rgba(0,0,0,0.28);
+    opacity:0;
+    transition:opacity .35s ease, transform .5s cubic-bezier(.2,.75,.25,1), left .35s ease;
+    pointer-events:none; z-index:3;
+  }
+  .story-box::-webkit-scrollbar{ display:none; }
+  .story-box.in{ opacity:1; transform:translate(0, -50%); }
+
+  /* Character dialogue: move the bubble right so the model is visibly attached to it. */
+  .char-wrap.in + .story-box{
+    left:16%;
+    width:min(39%, 520px);
+  }
+  .char-wrap.in + .story-box.in{
+    transform:translate(0, -50%);
+  }
+
+  /* Small speech-bubble tail between the model and the bubble. */
+  .story-box::before{
+    content:''; position:absolute; left:-7px; top:50%; margin-top:-6px;
+    width:12px; height:12px; background:rgba(28,22,38,0.95);
+    border-left:1px solid var(--panel-edge-strong); border-bottom:1px solid var(--panel-edge-strong);
+    transform:rotate(45deg); display:block;
+  }
+  .char-wrap:not(.in) + .story-box::before{ display:none; }
+
+  /* Keep the model visually tied to the character bubble without changing the HTML structure. */
+  .char-wrap.in + .story-box .action-name{ padding-left:1px; }
+
+  .action-name{
+    font-family:'Iowan Old Style',Georgia,serif; font-size:11.5px; letter-spacing:.08em;
+    color:var(--amber); margin:0 0 5px; flex-shrink:0;
+  }
+  .action-name.user-line{ color:#9dbfe7; }
+  .story-box.user-line{
+    border-color:rgba(157,191,231,0.42);
+    background:
+      linear-gradient(135deg, rgba(157,191,231,0.065), transparent 68%),
+      rgba(24,29,43,0.96);
+  }
+  .narration-line{ margin:0; font-style:italic; font-size:14px; line-height:1.5; color:var(--parchment); }
+  .action-text{ margin:0; font-size:14.5px; line-height:1.6; white-space:pre-line; color:var(--parchment); }
+  .tap-hint{
+    margin-top:10px; align-self:flex-end; font-size:9px; letter-spacing:.05em;
+    color:rgba(239,227,206,0.4); text-transform:uppercase; flex-shrink:0;
+    display:flex; align-items:center; gap:4px;
+  }
+  .tap-hint::after{
+    content:'\25BE'; display:inline-block; animation:tap-hint-bounce 1.1s ease-in-out infinite;
+  }
+  @keyframes tap-hint-bounce{
+    0%,100%{ transform:translateY(0); opacity:.55; }
+    50%{ transform:translateY(3px); opacity:1; }
+  }
+  .player-tap-area{
+    position:absolute; inset:0; z-index:1;
+    pointer-events:auto;
+  }
+  /* The choice panel must always sit above the tap-to-continue layer. */
+  .choices-row,
+  .choices-row *{
+    pointer-events:auto;
+  }
+  .choices-row.show{
+    z-index:30;
+  }
+
+  /* Choices: stacked vertically on the RIGHT, entering from the right edge. */
+  .choices-row{
+    position:absolute; right:2.2%; top:50%;
+    width:min(34%, 430px);
+    max-height:72%;
+    display:flex; flex-direction:column; justify-content:center; align-items:stretch;
+    gap:9px; padding:0;
+    transform:translate(115%, -50%);
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity .35s ease, transform .5s cubic-bezier(.2,.75,.25,1), visibility 0s linear .5s;
+    z-index:12;
+  }
+  .choices-row.show{
+    transform:translate(0, -50%);
+    opacity:1; visibility:visible; pointer-events:auto;
+    transition:opacity .35s ease, transform .5s cubic-bezier(.2,.75,.25,1), visibility 0s linear 0s;
+  }
+  .choices-row.show.end-mode{
+    flex-direction:column; justify-content:center; align-items:stretch;
+    transform:translate(0, -50%);
+  }
+
+  .choice-btn{
+    flex:0 0 auto; width:100%; min-height:48px;
+    text-align:left; padding:11px 14px; border-radius:11px;
+    border:1px solid var(--panel-edge);
+    background:
+      linear-gradient(135deg, rgba(226,173,104,0.10), rgba(255,255,255,0.035)),
+      rgba(24,18,32,0.94);
+    color:var(--parchment); font-size:12.5px; cursor:pointer;
+    font-family:inherit; line-height:1.35;
+    display:flex; align-items:center; gap:9px;
+    box-shadow:0 7px 20px rgba(0,0,0,0.2);
+    transition:background .18s ease, border-color .18s ease, transform .18s ease;
+    opacity:0; transform:translateX(18px) scale(.97);
+    animation:choice-pop-in .38s cubic-bezier(.2,.75,.25,1) forwards;
+  }
+  .choice-btn .choice-num{
+    flex-shrink:0; width:19px; height:19px; border-radius:50%;
+    background:rgba(226,173,104,0.16); border:1px solid var(--panel-edge-strong);
+    color:var(--amber); font-size:10.5px; font-family:'Iowan Old Style',Georgia,serif;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .choice-btn:nth-child(1){ animation-delay:.05s; }
+  .choice-btn:nth-child(2){ animation-delay:.15s; }
+  .choice-btn:nth-child(3){ animation-delay:.25s; }
+  .choice-btn:nth-child(4){ animation-delay:.32s; }
+  @keyframes choice-pop-in{ to{ opacity:1; transform:translateX(0) scale(1); } }
+  .choice-btn:active{
+    background:
+      linear-gradient(135deg, rgba(226,173,104,0.19), rgba(255,255,255,0.045)),
+      rgba(24,18,32,0.96);
+    border-color:var(--panel-edge-strong);
+    transform:translateX(-3px) !important;
+  }
+
+  .end-note{
+    text-align:center; font-size:11.5px; color:rgba(239,227,206,0.5);
+    margin-bottom:8px; width:100%;
+  }
+
+  /* -------- modal (character manager) -------- */
+  .modal-overlay{
+    position:fixed; inset:0; z-index:20; background:rgba(0,0,0,0.6);
+    display:none; align-items:flex-end; justify-content:center;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal-panel{
+    width:100%; max-width:520px; max-height:80dvh; overflow-y:auto;
+    background:
+      linear-gradient(145deg, rgba(255,255,255,0.035), transparent 55%),
+      #1b1626;
+    border:1px solid var(--panel-edge); border-radius:14px 14px 0 0;
+    padding:20px 18px calc(20px + env(safe-area-inset-bottom));
+    box-shadow:0 -12px 35px rgba(0,0,0,0.28);
+  }
+  .modal-panel h3{ margin:0 0 14px; font-family:'Iowan Old Style',Georgia,serif; color:var(--amber); font-size:16px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ HOME ============ -->
+  <div class="screen active" id="screen-home">
+    <div class="topbar">
+      <h1>Your Worlds</h1>
+    </div>
+    <div class="content">
+      <div class="world-list" id="worldList"></div>
+    </div>
+    <div class="fab"><button id="btnNewWorld" title="Create a world">+</button></div>
+  </div>
+
+  <!-- ============ CREATE WORLD ============ -->
+  <div class="screen" id="screen-create">
+    <div class="topbar">
+      <div class="icon-btn back-btn" id="backFromCreate">&#8592;</div>
+      <h1>New World</h1>
+    </div>
+    <div class="content">
+      <label class="field-label first">World name</label>
+      <input type="text" id="newWorldName" placeholder="e.g. The Last Ember City">
+
+      <label class="field-label">Characters</label>
+      <div id="newCharList"></div>
+      <button class="ghost-btn" id="addCharBtn">+ Add character</button>
+      <p class="hint-text">You can add or edit characters later too.</p>
+
+      <button class="primary-btn" id="createWorldBtn">Create world &amp; start writing</button>
+    </div>
+  </div>
+
+  <!-- ============ EDITOR ============ -->
+  <div class="screen" id="screen-editor">
+    <div class="topbar">
+      <div class="icon-btn back-btn" id="backFromEditor">&#8592;</div>
+      <h1 id="editorWorldName">Editing</h1>
+      <div class="icon-btn" id="openCharManager" title="Characters">&#128100;</div>
+    </div>
+    <div class="page-strip">
+      <button id="pagePrev">&#8249;</button>
+      <div class="page-jump" id="pageJumpLabel" style="text-align:center;font-size:13px;color:rgba(239,227,206,0.7);">Page 1</div>
+      <button id="pageNext">&#8250;</button>
+    </div>
+    <div class="content">
+
+      <div id="bubbleSlots"></div>
+
+      <div class="slot">
+        <div class="slot-title"><span class="num">&#9670;</span> Choices for the reader</div>
+        <div class="choice-block">
+          <div class="choice-label">Option A</div>
+          <div class="choice-row">
+            <input type="text" id="choiceText0" placeholder="Choice text">
+          </div>
+        </div>
+        <div class="choice-block">
+          <div class="choice-label">Option B</div>
+          <div class="choice-row">
+            <input type="text" id="choiceText1" placeholder="Choice text">
+          </div>
+        </div>
+        <div class="choice-block">
+          <div class="choice-label">Option C</div>
+          <div class="choice-row">
+            <input type="text" id="choiceText2" placeholder="Choice text">
+          </div>
+        </div>
+        <p class="hint-text">Leave an option blank to hide it during play. Whichever option is picked (or if none are set) the story simply moves on to the next page.</p>
+      </div>
+
+      <button class="secondary-btn" id="playFromHereBtn">▶ Preview from this page</button>
+    </div>
+  </div>
+
+  <!-- ============ PLAYER ============ -->
+  <div class="screen" id="screen-player">
+    <div class="player-stage">
+      <div class="player-header">
+        <span id="playerWorldLabel">World</span>
+        <div class="progress-dots" id="playerProgress"></div>
+        <button class="exit-btn" id="playerExit">&#10005; Exit</button>
+      </div>
+      <div class="player-main">
+        <div class="ambient-particles" id="ambientParticles"></div>
+        <div class="page-flash" id="pageFlash"></div>
+        <div class="duo" id="playerDuo">
+          <div class="char-wrap" id="playerCharWrap">
+            <img class="sprite" id="playerCharImg" alt="">
+          </div>
+          <div class="story-box" id="playerBox">
+            <p class="action-name" id="playerCharName" style="display:none;"></p>
+            <p class="narration-line" id="playerNarration" style="display:none;"></p>
+            <p class="action-text" id="playerAction" style="display:none;"></p>
+            <span class="tap-hint" id="playerTapHint" style="display:none;">tap to continue</span>
+          </div>
+        </div>
+        <div class="player-tap-area" id="playerTapArea"></div>
+      </div>
+      <div class="choices-row" id="playerChoices"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- character manager modal -->
+<div class="modal-overlay" id="charModalOverlay">
+  <div class="modal-panel" id="charModalPanel">
+    <h3>Characters in this world</h3>
+    <div id="charManagerList"></div>
+    <button class="ghost-btn" id="addCharBtnEditor">+ Add character</button>
+    <button class="secondary-btn" id="closeCharModal">Done</button>
+  </div>
+</div>
+
+<input type="file" id="hiddenFileInput" accept="image/*">
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- storage ---------------- */
+  var STORAGE_KEY = 'multiWorldStoryApp.v1';
+  var DEFAULT_AVATAR_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
+    '<circle cx="50" cy="50" r="50" fill="#3b2740"/>' +
+    '<circle cx="50" cy="40" r="18" fill="#c98a63"/>' +
+    '<path d="M20 90 Q50 62 80 90 Z" fill="#4a2b52"/>' +
+    '</svg>';
+  var DEFAULT_AVATAR = 'data:image/svg+xml;utf8,' + encodeURIComponent(DEFAULT_AVATAR_SVG);
+
+  /* Many character renders (full-body "standee" art especially) ship with a
+     big margin of empty transparent space around the actual figure. That
+     margin eats into the small character-model box in the player, making
+     the character look tiny or oddly placed. Here we crop an uploaded
+     image down to its actual visible content (plus a small breathing-room
+     margin) before storing it — but only when there's a lot of empty space
+     to begin with, so ordinary photos/avatars are left untouched. */
+  function trimTransparentPadding(dataUrl, callback){
+    try{
+      var img = new Image();
+      img.onload = function(){
+        try{
+          var w = img.naturalWidth, h = img.naturalHeight;
+          if(!w || !h){ callback(dataUrl); return; }
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          var data = ctx.getImageData(0, 0, w, h).data;
+          var minX = w, minY = h, maxX = -1, maxY = -1;
+          var alphaThreshold = 10;
+          for(var y = 0; y < h; y++){
+            var rowStart = y * w;
+            for(var x = 0; x < w; x++){
+              if(data[(rowStart + x) * 4 + 3] > alphaThreshold){
+                if(x < minX) minX = x;
+                if(x > maxX) maxX = x;
+                if(y < minY) minY = y;
+                if(y > maxY) maxY = y;
+              }
+            }
+          }
+          if(maxX <= minX || maxY <= minY){ callback(dataUrl); return; }
+          var contentW = maxX - minX + 1, contentH = maxY - minY + 1;
+          var emptyRatio = 1 - (contentW * contentH) / (w * h);
+          if(emptyRatio < 0.12){ callback(dataUrl); return; } // not much padding, leave it be
+          var padX = Math.round(contentW * 0.04), padY = Math.round(contentH * 0.04);
+          var cx = Math.max(0, minX - padX), cy = Math.max(0, minY - padY);
+          var cw = Math.min(w - cx, contentW + padX * 2);
+          var ch = Math.min(h - cy, contentH + padY * 2);
+          var out = document.createElement('canvas');
+          out.width = cw; out.height = ch;
+          out.getContext('2d').drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
+          callback(out.toDataURL('image/png'));
+        }catch(err){ callback(dataUrl); }
+      };
+      img.onerror = function(){ callback(dataUrl); };
+      img.src = dataUrl;
+    }catch(err){ callback(dataUrl); }
+  }
+
+  function loadData(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return { worlds: [] };
+  }
+  function saveData(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA)); }catch(e){ console.warn('save failed', e); }
+  }
+  var DATA = loadData();
+
+  function uid(prefix){
+    return prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  }
+  function findWorld(id){
+    for(var i=0;i<DATA.worlds.length;i++){ if(DATA.worlds[i].id === id) return DATA.worlds[i]; }
+    return null;
+  }
+  function pageIds(world){ return Object.keys(world.pages); }
+  function pageNumber(world, pageId){ return pageIds(world).indexOf(pageId) + 1; }
+
+  function blankPage(){
+    return { id: uid('p'), bubbles:[ { id: uid('b'), type:'narration', text:'' } ], choices:[
+      {text:''}, {text:''}, {text:''}
+    ]};
+  }
+  function migratePage(page){
+    if(!page.bubbles){
+      page.bubbles = [];
+      if(page.narration && page.narration.trim()){
+        page.bubbles.push({ id: uid('b'), type:'narration', text: page.narration });
+      }
+      if(page.characterId && page.dialogue && page.dialogue.trim()){
+        page.bubbles.push({ id: uid('b'), type:'npc', characterId: page.characterId, text: page.dialogue });
+      }
+      if(page.bubbles.length === 0){
+        page.bubbles.push({ id: uid('b'), type:'narration', text:'' });
+      }
+      delete page.narration; delete page.characterId; delete page.dialogue;
+    }
+    if(!page.choices){
+      page.choices = [{text:''},{text:''},{text:''}];
+    }
+    return page;
+  }
+  /* Where the story goes after this page's bubbles (and any chosen option)
+     are done: simply the next page in the order it was created. There is
+     no longer a per-choice destination to configure. */
+  function nextPageId(world, currentPageId){
+    var ids = pageIds(world);
+    var idx = ids.indexOf(currentPageId);
+    if(idx === -1 || idx === ids.length - 1) return null;
+    return ids[idx + 1];
+  }
+  function getUserCharacter(world){
+    return world.characters.filter(function(c){ return c.isUser; })[0] || null;
+  }
+
+  /* ---------------- screen switching ---------------- */
+  function showScreen(id){
+    var screens = document.querySelectorAll('.screen');
+    for(var i=0;i<screens.length;i++){ screens[i].classList.remove('active'); }
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  /* ---------------- HOME ---------------- */
+  var worldListEl = document.getElementById('worldList');
+
+  function renderHome(){
+    worldListEl.innerHTML = '';
+    if(DATA.worlds.length === 0){
+      worldListEl.innerHTML = '<div class="empty-state"><div class="big">&#10022;</div>No worlds yet.<br>Tap + to create your first one.</div>';
+      return;
+    }
+    DATA.worlds.forEach(function(w){
+      var card = document.createElement('div');
+      card.className = 'world-card';
+      var pcount = pageIds(w).length;
+      card.innerHTML =
+        '<div class="glyph">' + (w.name.trim().charAt(0).toUpperCase() || '?') + '</div>' +
+        '<div class="meta"><h3></h3><p></p></div>' +
+        '<div class="row-actions">' +
+          '<div class="mini-btn" data-edit="' + w.id + '" title="Edit">&#9998;</div>' +
+          '<div class="mini-btn danger" data-del="' + w.id + '" title="Delete">&#128465;</div>' +
+        '</div>';
+      card.querySelector('h3').textContent = w.name || 'Untitled world';
+      card.querySelector('p').textContent = w.characters.length + ' character' + (w.characters.length===1?'':'s') + ' · ' + pcount + ' page' + (pcount===1?'':'s');
+      card.addEventListener('click', function(e){
+        if(e.target.closest('[data-edit]') || e.target.closest('[data-del]')) return;
+        openPlayer(w.id);
+      });
+      card.querySelector('[data-edit]').addEventListener('click', function(e){
+        e.stopPropagation();
+        openEditor(w.id, w.startPageId);
+      });
+      card.querySelector('[data-del]').addEventListener('click', function(e){
+        e.stopPropagation();
+        if(confirm('Delete "' + (w.name || 'this world') + '"? This cannot be undone.')){
+          DATA.worlds = DATA.worlds.filter(function(x){ return x.id !== w.id; });
+          saveData(); renderHome();
+        }
+      });
+      worldListEl.appendChild(card);
+    });
+  }
+
+  document.getElementById('btnNewWorld').addEventListener('click', function(){
+    document.getElementById('newWorldName').value = '';
+    document.getElementById('newCharList').innerHTML = '';
+    newCharRow(); // start with one character row
+    showScreen('screen-create');
+  });
+  document.getElementById('backFromCreate').addEventListener('click', function(){ showScreen('screen-home'); });
+
+  /* ---------------- CREATE WORLD ---------------- */
+  var newCharListEl = document.getElementById('newCharList');
+
+  function newCharRow(name, image, isUser){
+    var row = document.createElement('div');
+    row.className = 'char-row';
+    row.innerHTML =
+      '<img class="avatar" src="' + (image || DEFAULT_AVATAR) + '">' +
+      '<input type="text" placeholder="Character name" value="' + (name ? escapeAttr(name) : '') + '">' +
+      '<label class="user-toggle" title="This is your character"><input type="checkbox" class="isUserCheckbox"><span>You</span></label>' +
+      '<div class="mini-btn avatar-btn" title="Upload image">&#128247;</div>' +
+      '<div class="remove-char">&times;</div>';
+    row.querySelector('.isUserCheckbox').checked = !!isUser;
+    row.querySelector('.avatar-btn').addEventListener('click', function(){
+      pickImageFor(row.querySelector('.avatar'));
+    });
+    row.querySelector('.remove-char').addEventListener('click', function(){ row.remove(); });
+    row.querySelector('.isUserCheckbox').addEventListener('change', function(e){
+      if(e.target.checked){
+        newCharListEl.querySelectorAll('.isUserCheckbox').forEach(function(cb){
+          if(cb !== e.target) cb.checked = false;
+        });
+      }
+    });
+    newCharListEl.appendChild(row);
+    return row;
+  }
+  function escapeAttr(s){ return String(s).replace(/"/g,'&quot;'); }
+
+  document.getElementById('addCharBtn').addEventListener('click', function(){ newCharRow(); });
+
+  var pendingImageTarget = null;
+  var hiddenFileInput = document.getElementById('hiddenFileInput');
+  function pickImageFor(imgEl){
+    pendingImageTarget = imgEl;
+    hiddenFileInput.value = '';
+    hiddenFileInput.click();
+  }
+  hiddenFileInput.addEventListener('change', function(e){
+    var file = e.target.files && e.target.files[0];
+    if(!file || !pendingImageTarget) return;
+    var target = pendingImageTarget;
+    var reader = new FileReader();
+    reader.onload = function(){
+      trimTransparentPadding(reader.result, function(finalUrl){
+        target.src = finalUrl;
+        target.dataset.img = finalUrl;
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('createWorldBtn').addEventListener('click', function(){
+    var name = document.getElementById('newWorldName').value.trim();
+    if(!name){ alert('Give your world a name first.'); return; }
+    var characters = [];
+    newCharListEl.querySelectorAll('.char-row').forEach(function(row){
+      var cname = row.querySelector('input[type=text]').value.trim();
+      var img = row.querySelector('.avatar');
+      var isUserChecked = row.querySelector('.isUserCheckbox').checked;
+      if(cname){
+        characters.push({ id: uid('c'), name: cname, image: img.dataset.img || null, isUser: isUserChecked });
+      }
+    });
+    var firstPage = blankPage();
+    var world = {
+      id: uid('w'),
+      name: name,
+      createdAt: Date.now(),
+      characters: characters,
+      pages: {},
+      startPageId: firstPage.id
+    };
+    world.pages[firstPage.id] = firstPage;
+    DATA.worlds.push(world);
+    saveData();
+    openEditor(world.id, firstPage.id);
+  });
+
+  /* ---------------- EDITOR ---------------- */
+  var editingWorldId = null;
+  var editingPageId = null;
+  var bubbleSlotsEl = document.getElementById('bubbleSlots');
+
+  function openEditor(worldId, pageId){
+    editingWorldId = worldId;
+    editingPageId = pageId;
+    var world = findWorld(worldId);
+    document.getElementById('editorWorldName').textContent = world.name || 'Editing';
+    renderEditorPage();
+    showScreen('screen-editor');
+  }
+
+  function populateCharSelect(selectEl, world, selectedId, includeCreateOption){
+    selectEl.innerHTML = '';
+    var noneOpt = document.createElement('option');
+    noneOpt.value = ''; noneOpt.textContent = '— no character —';
+    selectEl.appendChild(noneOpt);
+    world.characters.forEach(function(c){
+      var opt = document.createElement('option');
+      opt.value = c.id; opt.textContent = c.name;
+      if(c.id === selectedId) opt.selected = true;
+      selectEl.appendChild(opt);
+    });
+  }
+
+  function renderEditorPage(){
+    var world = findWorld(editingWorldId);
+    var page = migratePage(world.pages[editingPageId]);
+    var num = pageNumber(world, editingPageId);
+    var total = pageIds(world).length;
+
+    document.getElementById('pageJumpLabel').textContent = 'Page ' + num + ' of ' + total;
+    document.getElementById('pagePrev').disabled = (num <= 1);
+
+    renderBubbleSlots();
+
+    for(var i=0;i<3;i++){
+      var ch = page.choices[i] || {text:''};
+      document.getElementById('choiceText' + i).value = ch.text || '';
+    }
+  }
+
+  function renderBubbleSlots(){
+    var world = findWorld(editingWorldId);
+    var page = world.pages[editingPageId];
+    bubbleSlotsEl.innerHTML = '';
+    page.bubbles.forEach(function(b, idx){
+      var slot = document.createElement('div');
+      slot.className = 'slot';
+      slot.dataset.bubbleId = b.id;
+
+      var titleRow = document.createElement('div');
+      titleRow.className = 'slot-title';
+      titleRow.innerHTML = '<span class="num">' + (idx + 1) + '</span>';
+
+      var typeSelect = document.createElement('select');
+      typeSelect.className = 'bubble-type-select';
+      typeSelect.style.maxWidth = '180px';
+      typeSelect.innerHTML =
+        '<option value="narration"' + (b.type==='narration'?' selected':'') + '>Narration</option>' +
+        '<option value="npc"' + (b.type==='npc'?' selected':'') + '>Character line</option>' +
+        '<option value="user"' + (b.type==='user'?' selected':'') + '>Your character line</option>';
+      titleRow.appendChild(typeSelect);
+
+      if(page.bubbles.length > 1){
+        var removeBtn = document.createElement('span');
+        removeBtn.textContent = '\u00d7';
+        removeBtn.style.marginLeft = 'auto';
+        removeBtn.style.cursor = 'pointer';
+        removeBtn.style.fontSize = '18px';
+        removeBtn.style.color = 'rgba(239,227,206,0.4)';
+        removeBtn.addEventListener('click', function(){
+          readFormIntoPage();
+          page.bubbles = page.bubbles.filter(function(x){ return x.id !== b.id; });
+          saveData();
+          renderEditorPage();
+        });
+        titleRow.appendChild(removeBtn);
+      }
+      slot.appendChild(titleRow);
+
+      if(b.type === 'npc'){
+        var charSelect = document.createElement('select');
+        charSelect.className = 'bubble-char-select';
+        charSelect.style.marginBottom = '10px';
+        populateCharSelect(charSelect, world, b.characterId);
+        slot.appendChild(charSelect);
+      }
+
+      var ta = document.createElement('textarea');
+      ta.className = 'bubble-text';
+      ta.placeholder = b.type === 'narration' ? 'Set the scene... (leave blank to skip this step during play)' :
+        (b.type === 'user' ? 'What your character says or does...' : 'What they say or do...');
+      ta.value = b.text || '';
+      slot.appendChild(ta);
+
+      bubbleSlotsEl.appendChild(slot);
+
+      typeSelect.addEventListener('change', function(e){
+        readFormIntoPage();
+        b.type = e.target.value;
+        if(b.type !== 'npc') b.characterId = '';
+        saveData();
+        renderEditorPage();
+      });
+    });
+  }
+
+  function readFormIntoPage(){
+    var world = findWorld(editingWorldId);
+    var page = world.pages[editingPageId];
+    bubbleSlotsEl.querySelectorAll('.slot').forEach(function(slot){
+      var b = page.bubbles.filter(function(x){ return x.id === slot.dataset.bubbleId; })[0];
+      if(!b) return;
+      var ta = slot.querySelector('.bubble-text');
+      if(ta) b.text = ta.value;
+      var cs = slot.querySelector('.bubble-char-select');
+      if(cs) b.characterId = cs.value;
+    });
+    for(var i=0;i<3;i++){
+      page.choices[i] = {
+        text: document.getElementById('choiceText' + i).value
+      };
+    }
+    saveData();
+  }
+
+  document.getElementById('pagePrev').addEventListener('click', function(){
+    readFormIntoPage();
+    var world = findWorld(editingWorldId);
+    var ids = pageIds(world);
+    var idx = ids.indexOf(editingPageId);
+    if(idx > 0){ editingPageId = ids[idx - 1]; renderEditorPage(); }
+  });
+  document.getElementById('pageNext').addEventListener('click', function(){
+    readFormIntoPage();
+    var world = findWorld(editingWorldId);
+    var ids = pageIds(world);
+    var idx = ids.indexOf(editingPageId);
+    if(idx < ids.length - 1){
+      editingPageId = ids[idx + 1];
+    } else {
+      var np = blankPage();
+      world.pages[np.id] = np;
+      saveData();
+      editingPageId = np.id;
+    }
+    renderEditorPage();
+  });
+  document.getElementById('backFromEditor').addEventListener('click', function(){
+    readFormIntoPage();
+    renderHome();
+    showScreen('screen-home');
+  });
+  document.getElementById('playFromHereBtn').addEventListener('click', function(){
+    readFormIntoPage();
+    openPlayer(editingWorldId, editingPageId);
+  });
+
+  /* ---- character manager modal (from editor) ---- */
+  var charModalOverlay = document.getElementById('charModalOverlay');
+  var charManagerList = document.getElementById('charManagerList');
+
+  function renderCharManager(){
+    var world = findWorld(editingWorldId);
+    charManagerList.innerHTML = '';
+    world.characters.forEach(function(c){
+      var row = document.createElement('div');
+      row.className = 'char-row';
+      row.innerHTML =
+        '<img class="avatar" src="' + (c.image || DEFAULT_AVATAR) + '">' +
+        '<input type="text" value="' + escapeAttr(c.name) + '">' +
+        '<label class="user-toggle" title="This is your character"><input type="checkbox" class="isUserCheckbox"><span>You</span></label>' +
+        '<div class="mini-btn avatar-btn">&#128247;</div>' +
+        '<div class="remove-char">&times;</div>';
+      var img = row.querySelector('.avatar');
+      img.dataset.img = c.image || '';
+      row.querySelector('.isUserCheckbox').checked = !!c.isUser;
+      row.querySelector('input[type=text]').addEventListener('input', function(e){
+        c.name = e.target.value; saveData();
+      });
+      row.querySelector('.isUserCheckbox').addEventListener('change', function(e){
+        if(e.target.checked){
+          world.characters.forEach(function(x){ x.isUser = (x.id === c.id); });
+        } else {
+          c.isUser = false;
+        }
+        saveData();
+        renderCharManager();
+      });
+      row.querySelector('.avatar-btn').addEventListener('click', function(){
+        pendingImageTarget = img;
+        hiddenFileInput.value = '';
+        hiddenFileInput.onchangeOverride = function(dataUrl){ c.image = dataUrl; saveData(); };
+        hiddenFileInput.click();
+      });
+      row.querySelector('.remove-char').addEventListener('click', function(){
+        world.characters = world.characters.filter(function(x){ return x.id !== c.id; });
+        saveData();
+        renderCharManager();
+      });
+      charManagerList.appendChild(row);
+    });
+  }
+  // extend the shared file input handler to also notify the character-manager row, when set
+  hiddenFileInput.addEventListener('change', function(e){
+    var file = e.target.files && e.target.files[0];
+    if(!file) return;
+    var target = pendingImageTarget;
+    var reader = new FileReader();
+    reader.onload = function(){
+      trimTransparentPadding(reader.result, function(finalUrl){
+        if(target) target.src = finalUrl;
+        if(typeof hiddenFileInput.onchangeOverride === 'function'){
+          hiddenFileInput.onchangeOverride(finalUrl);
+          hiddenFileInput.onchangeOverride = null;
+        }
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('openCharManager').addEventListener('click', function(){
+    renderCharManager();
+    charModalOverlay.classList.add('open');
+  });
+  document.getElementById('closeCharModal').addEventListener('click', function(){
+    charModalOverlay.classList.remove('open');
+    renderEditorPage(); // refresh character dropdown in case names/images changed
+  });
+  charModalOverlay.addEventListener('click', function(e){
+    if(e.target === charModalOverlay){ charModalOverlay.classList.remove('open'); renderEditorPage(); }
+  });
+  document.getElementById('addCharBtnEditor').addEventListener('click', function(){
+    var world = findWorld(editingWorldId);
+    world.characters.push({ id: uid('c'), name: 'New character', image: null });
+    saveData();
+    renderCharManager();
+  });
+
+  /* ---------------- PLAYER ---------------- */
+  var playingWorldId = null;
+  var playingPageId = null;
+  var stepIdx = -1;
+  var stepList = [];
+  var locked = false;
+  /* The choice that led to the current page. It is shown as the player's
+     response without permanently changing the authored page. */
+  var pendingChoiceText = '';
+
+  var playerBox = document.getElementById('playerBox');
+  var playerCharWrap = document.getElementById('playerCharWrap');
+  var playerCharImg = document.getElementById('playerCharImg');
+  var playerCharName = document.getElementById('playerCharName');
+  var playerNarration = document.getElementById('playerNarration');
+  var playerAction = document.getElementById('playerAction');
+  var playerTapHint = document.getElementById('playerTapHint');
+  var playerChoices = document.getElementById('playerChoices');
+  var playerTapArea = document.getElementById('playerTapArea');
+  var playerProgress = document.getElementById('playerProgress');
+  var pageFlash = document.getElementById('pageFlash');
+  var ambientParticles = document.getElementById('ambientParticles');
+  var lastCharacterShown = null;
+
+  /* -------- feel: haptics, typewriter text, ambience -------- */
+  function buzz(ms){
+    try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){}
+  }
+
+  var typeTimer = null;
+  var isTyping = false;
+  var typingEl = null;
+  var typingFullText = '';
+
+  function typeText(el, text){
+    clearInterval(typeTimer);
+    typingEl = el;
+    typingFullText = text;
+    el.textContent = '';
+    isTyping = true;
+    playerTapHint.style.display = 'none';
+    var i = 0;
+    var CHARS_PER_TICK = 2;
+    typeTimer = setInterval(function(){
+      i += CHARS_PER_TICK;
+      if(i >= text.length){
+        el.textContent = text;
+        clearInterval(typeTimer);
+        isTyping = false;
+        playerTapHint.style.display = '';
+      } else {
+        el.textContent = text.slice(0, i);
+      }
+    }, 14);
+  }
+
+  function finishTyping(){
+    if(!isTyping) return;
+    clearInterval(typeTimer);
+    if(typingEl) typingEl.textContent = typingFullText;
+    isTyping = false;
+    playerTapHint.style.display = '';
+  }
+
+  function renderProgressDots(){
+    playerProgress.innerHTML = '';
+    if(stepList.length < 2) return; // not worth a HUD for a single beat
+    stepList.forEach(function(_, i){
+      var dot = document.createElement('span');
+      dot.className = 'dot' + (i <= stepIdx ? ' done' : '');
+      playerProgress.appendChild(dot);
+    });
+  }
+
+  function flashPage(){
+    pageFlash.classList.remove('show');
+    void pageFlash.offsetWidth; // restart the animation
+    pageFlash.classList.add('show');
+    setTimeout(function(){ pageFlash.classList.remove('show'); }, 260);
+  }
+
+  var particlesSpawned = false;
+  function spawnAmbientParticles(){
+    if(particlesSpawned) return;
+    particlesSpawned = true;
+    var count = 16;
+    for(var i = 0; i < count; i++){
+      var mote = document.createElement('span');
+      mote.className = 'mote';
+      var size = 2 + Math.random() * 3.5;
+      mote.style.width = size + 'px';
+      mote.style.height = size + 'px';
+      mote.style.left = (Math.random() * 100) + '%';
+      mote.style.setProperty('--drift', (Math.random() * 40 - 20) + 'px');
+      mote.style.animationDuration = (9 + Math.random() * 10) + 's';
+      mote.style.animationDelay = (Math.random() * 12) + 's';
+      ambientParticles.appendChild(mote);
+    }
+  }
+
+  function openPlayer(worldId, pageId){
+    playingWorldId = worldId;
+    pendingChoiceText = '';
+    var world = findWorld(worldId);
+    document.getElementById('playerWorldLabel').textContent = world.name;
+    spawnAmbientParticles();
+    goToPage(pageId || world.startPageId);
+    showScreen('screen-player');
+  }
+
+  function goToPage(pageId){
+    playingPageId = pageId;
+    var world = findWorld(playingWorldId);
+    var page = migratePage(world.pages[pageId]);
+    stepList = [];
+
+    (page.bubbles || []).forEach(function(b){
+      if(b.type === 'narration'){
+        if(b.text && b.text.trim()) stepList.push({ kind:'narration', text: b.text });
+      } else if(b.type === 'npc'){
+        if(b.text && b.text.trim()){
+          var character = b.characterId ? world.characters.filter(function(c){ return c.id === b.characterId; })[0] : null;
+          stepList.push({ kind:'dialogue', character: character || null, text: b.text, isUser:false });
+        }
+      } else if(b.type === 'user'){
+        if(b.text && b.text.trim()){
+          var uc = getUserCharacter(world) || { name:'You', image:null };
+          stepList.push({ kind:'dialogue', character: uc, text: b.text, isUser:true });
+        }
+      }
+    });
+    pendingChoiceText = '';
+    stepIdx = -1;
+    clearInterval(typeTimer);
+    isTyping = false;
+    playerBox.classList.remove('in');
+    playerBox.classList.remove('user-line');
+    playerBox.style.display = '';
+    playerCharWrap.classList.remove('in');
+    lastCharacterShown = null;
+    playerChoices.classList.remove('show', 'end-mode');
+    playerChoices.innerHTML = '';
+    flashPage();
+    advanceStep();
+  }
+
+  function advanceStep(){
+    if(locked) return;
+    locked = true;
+    setTimeout(function(){ locked = false; }, 200);
+
+    stepIdx++;
+    renderProgressDots();
+    if(stepIdx < stepList.length){
+      renderStep(stepList[stepIdx]);
+    } else {
+      renderChoices();
+    }
+  }
+
+  function renderStep(step){
+    playerCharName.style.display = 'none';
+    playerNarration.style.display = 'none';
+    playerAction.style.display = 'none';
+    playerTapHint.style.display = 'none';
+    playerChoices.classList.remove('show', 'end-mode');
+    playerBox.style.display = '';
+    playerBox.classList.toggle('user-line', !!step.isUser);
+    playerCharName.classList.toggle('user-line', !!step.isUser);
+
+    if(step.kind === 'narration'){
+      playerCharWrap.classList.remove('in');
+      lastCharacterShown = null;
+      playerNarration.style.display = '';
+      typeText(playerNarration, step.text);
+    } else {
+      if(step.character){
+        playerCharImg.src = step.character.image || DEFAULT_AVATAR;
+        playerCharName.textContent = step.character.name;
+        playerCharName.style.display = '';
+        playerCharWrap.classList.add('in');
+        lastCharacterShown = step.character;
+      } else {
+        playerCharWrap.classList.remove('in');
+        lastCharacterShown = null;
+      }
+      playerAction.style.display = '';
+      typeText(playerAction, step.text);
+    }
+    playerBox.classList.add('in');
+  }
+
+  /* Close out the current bubble, then move on. Used both when a choice is
+     tapped and when there's no choice to make at all. Picking an option
+     never adds a reply bubble of its own — it just decides that the story
+     continues, then the next narration/character bubble plays normally. */
+  function leavePageTo(targetId){
+    playerChoices.classList.remove('show');
+    playerChoices.style.pointerEvents = 'none';
+    setTimeout(function(){
+      playerChoices.style.pointerEvents = '';
+      if(targetId){
+        goToPage(targetId);
+      } else {
+        renderEnd();
+      }
+    }, 120);
+  }
+
+  function renderEnd(){
+    playerNarration.style.display = 'none';
+    playerAction.style.display = 'none';
+    playerTapHint.style.display = 'none';
+    if(!lastCharacterShown){
+      playerCharWrap.classList.remove('in');
+      playerCharName.style.display = 'none';
+      playerBox.classList.remove('in');
+      playerBox.style.display = 'none';
+    }
+    playerBox.style.display = '';
+    playerAction.textContent = 'The End';
+    playerAction.style.display = '';
+    playerBox.classList.add('in');
+    playerChoices.classList.add('show', 'end-mode');
+    playerChoices.innerHTML = '<div class="end-note">You\'ve reached the end of this thread.</div>' +
+      '<button class="choice-btn" id="backToWorldsFromEnd">&#8592; Back to worlds</button>';
+    document.getElementById('backToWorldsFromEnd').addEventListener('click', function(){
+      renderHome(); showScreen('screen-home');
+    });
+  }
+
+  /* Called once the page's bubbles are all done. Choices here are just
+     flavor text for THIS page — whichever one is tapped, or none at all,
+     the story always moves on to the next page (or ends, if this was the
+     last page in the world). Nothing ever dead-ends on an unset choice. */
+  function renderChoices(){
+    var world = findWorld(playingWorldId);
+    var page = world.pages[playingPageId];
+    var target = nextPageId(world, playingPageId);
+    var validChoices = (page.choices || []).filter(function(c){ return c.text && c.text.trim(); });
+
+    if(validChoices.length === 0){
+      /* No options written for this page: just continue the story. */
+      leavePageTo(target);
+      return;
+    }
+
+    playerNarration.style.display = 'none';
+    playerAction.style.display = 'none';
+    playerTapHint.style.display = 'none';
+    if(!lastCharacterShown){
+      playerCharWrap.classList.remove('in');
+      playerCharName.style.display = 'none';
+      playerBox.classList.remove('in');
+      playerBox.style.display = 'none';
+    }
+
+    playerChoices.classList.add('show');
+    playerChoices.classList.remove('end-mode');
+    playerChoices.innerHTML = '';
+    validChoices.forEach(function(c, i){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'choice-btn';
+      var badge = document.createElement('span');
+      badge.className = 'choice-num';
+      badge.textContent = String(i + 1);
+      var label = document.createElement('span');
+      label.textContent = c.text;
+      btn.appendChild(badge);
+      btn.appendChild(label);
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        buzz(12);
+        /* No matter which option is picked, the story continues to the
+           next page — the chosen text just appears as the player's line. */
+        leavePageTo(target);
+      });
+      playerChoices.appendChild(btn);
+    });
+  }
+
+  playerTapArea.addEventListener('click', function(){
+    if(isTyping){ finishTyping(); buzz(6); return; }
+    if(stepIdx < stepList.length - 1){
+      buzz(9);
+      advanceStep();
+    } else if(stepIdx === stepList.length - 1 && !playerChoices.classList.contains('show')){
+      buzz(9);
+      advanceStep(); // move from last narrative step into choices (or straight past them)
+    }
+  }, { passive:true });
+
+  document.getElementById('playerExit').addEventListener('click', function(){
+    clearInterval(typeTimer);
+    renderHome(); showScreen('screen-home');
+  });
+
+  /* ---------------- init ---------------- */
+  renderHome();
+})();
+</script>
+</body>
+</html>
