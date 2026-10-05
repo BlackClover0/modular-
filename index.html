@@ -1,0 +1,2353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#080c0a">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%E2%AC%87%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-title" content="Downloader.net">
+<meta name="description" content="Downloader.net: download images, GIFs, WebP, video, audio, PDFs and whole webpages from a URL, right in your browser.">
+<meta property="og:title" content="Downloader.net"><meta property="og:description" content="Download images, video, audio, PDFs and webpages from a URL.">
+<meta property="og:type" content="website">
+<title>Downloader.net</title>
+</head>
+<body>
+<noscript><p style="padding:16px;color:#fff;font-family:sans-serif">This site needs JavaScript enabled.</p></noscript>
+
+<!-- ═══════════════ SECTION 1 — HTML ═══════════════ -->
+
+<header>
+  <div class="brand">
+    <div class="brand-mark"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></div>
+    <div class="brand-text">
+      <div class="logo">Downloader<em>.net</em></div>
+    </div>
+  </div>
+  <div class="live-pill"><span class="status-dot"></span>Online</div>
+</header>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab active" onclick="switchCat('webpage')" id="cat-webpage">Webpage</button>
+    <button class="tab" onclick="switchCat('images')" id="cat-images">Images</button>
+    <button class="tab" onclick="switchCat('gif')" id="cat-gif">GIF</button>
+    <button class="tab" onclick="switchCat('webp')" id="cat-webp">WebP</button>
+    <button class="tab" onclick="switchCat('video')" id="cat-video">Video</button>
+    <button class="tab" onclick="switchCat('audio')" id="cat-audio">Audio</button>
+    <button class="tab" onclick="switchCat('pdf')" id="cat-pdf">PDF</button>
+  </div>
+</div>
+
+<main>
+
+<!-- IMAGES -->
+<div class="panel" id="panel-images">
+  <div class="panel-head">
+    <div class="panel-label">Mode / Images</div>
+    <div class="panel-title">Image Downloader</div>
+  </div>
+  <div class="mode-sw">
+    <button class="active" data-mode="direct" onclick="setMode('images','direct')">Direct URL</button>
+    <button data-mode="scan" onclick="setMode('images','scan')">Scan Page</button>
+    <button data-mode="convert" onclick="setMode('images','convert')">Convert</button>
+  </div>
+  <div id="images-direct">
+    <div class="input-row">
+      <input class="url-input" id="images-direct-url" placeholder="https://site.com/photo.jpg" onkeydown="if(event.key==='Enter')directDownload('images-direct-url','images-status','images-progress',['jpg','jpeg','png','webp','svg','bmp','tiff','avif'])"/>
+      <button class="go-btn" onclick="directDownload('images-direct-url','images-status','images-progress',['jpg','jpeg','png','webp','svg','bmp','tiff','avif'])">Fetch</button>
+    </div>
+  </div>
+  <div id="images-scan" style="display:none">
+    <div class="input-row">
+      <input class="url-input" id="images-scan-url" placeholder="https://site.com/gallery" onkeydown="if(event.key==='Enter')scanPage('images-scan-url','images-status','images-results','image')"/>
+      <button class="go-btn" onclick="scanPage('images-scan-url','images-status','images-results','image')">Scan</button>
+    </div>
+  </div>
+  <!-- IMAGES INLINE CONVERT -->
+  <div id="images-convert-inline" style="display:none">
+    <div class="inline-convert-tabs">
+      <button class="inline-convert-tab active" onclick="switchInlineConvert('images','img2gif')">Images → GIF</button>
+      <button class="inline-convert-tab" onclick="switchInlineConvert('images','img2video')">Images → Video</button>
+    </div>
+    <div class="inline-csec active" id="images-csec-img2gif">
+      <div class="convert-desc">Combine multiple images into an animated GIF — fully offline.</div>
+      <div class="conv-drop" id="drop-img2gif" onclick="document.getElementById('img2gif-file').click()">
+        <div class="conv-drop-icon">🖼</div>
+        <div class="conv-drop-label">Tap to choose images</div>
+        <div class="conv-drop-sub" id="img2gif-fname">JPEG, PNG, WebP — select multiple</div>
+        <input type="file" id="img2gif-file" style="display:none" onclick="event.stopPropagation()" accept="image/*" multiple onchange="onConvertFileChange('img2gif')"/>
+      </div>
+      <div class="convert-options">
+        <span class="conv-opt-label">Delay:</span>
+        <button class="convert-opt-btn" onclick="setConvertOpt('img2gif-delay',this,'200')">Fast (200ms)</button>
+        <button class="convert-opt-btn active" onclick="setConvertOpt('img2gif-delay',this,'500')">Normal (500ms)</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('img2gif-delay',this,'1000')">Slow (1s)</button>
+      </div>
+      <div class="convert-options">
+        <span class="conv-opt-label">Quality:</span>
+        <button class="convert-opt-btn" onclick="setConvertOpt('img2gif-width',this,'320');setConvertOpt('img2gif-colors',null,'64')">Low</button>
+        <button class="convert-opt-btn active" onclick="setConvertOpt('img2gif-width',this,'480');setConvertOpt('img2gif-colors',null,'128')">Medium</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('img2gif-width',this,'640');setConvertOpt('img2gif-colors',null,'192')">High</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('img2gif-width',this,'960');setConvertOpt('img2gif-colors',null,'256')">Ultra</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('img2gif-width',this,'1080');setConvertOpt('img2gif-colors',null,'256')">1080p</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('img2gif-width',this,'1440');setConvertOpt('img2gif-colors',null,'256')">1440p</button>
+      </div>
+      <div class="convert-options">
+        <span class="conv-opt-label">Dither:</span>
+        <button class="convert-opt-btn active" onclick="setConvertOpt('img2gif-dither',this,'none')">None</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('img2gif-dither',this,'fs')">Floyd-Steinberg</button>
+      </div>
+      <button class="convert-btn" id="btn-img2gif" onclick="convertMedia('img2gif')">▶ Create GIF</button>
+      <div class="status" id="img2gif-status"></div>
+      <div id="img2gif-result"></div>
+    </div>
+    <div class="inline-csec" id="images-csec-img2video">
+      <div class="convert-desc">Compile multiple images into a looping WebM video slideshow.</div>
+      <div class="conv-drop" id="drop-img2video" onclick="document.getElementById('img2video-file').click()">
+        <div class="conv-drop-icon">🖼</div>
+        <div class="conv-drop-label">Tap to choose images</div>
+        <div class="conv-drop-sub" id="img2video-fname">JPEG, PNG, WebP — select multiple</div>
+        <input type="file" id="img2video-file" style="display:none" onclick="event.stopPropagation()" accept="image/*" multiple onchange="onConvertFileChange('img2video')"/>
+      </div>
+      <div class="convert-options">
+        <span class="conv-opt-label">Per image:</span>
+        <button class="convert-opt-btn active" onclick="setConvertOpt('img2video-dur',this,'1000')">1s</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('img2video-dur',this,'2000')">2s</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('img2video-dur',this,'3000')">3s</button>
+      </div>
+      <button class="convert-btn" id="btn-img2video" onclick="convertMedia('img2video')">▶ Create Video</button>
+      <div class="status" id="img2video-status"></div>
+      <div id="img2video-result"></div>
+    </div>
+  </div>
+  <div class="scanning" id="images-scanning"><div class="pulse"><span></span><span></span><span></span></div><span id="images-scan-txt">Scanning…</span></div>
+  <div class="status" id="images-status"></div>
+  <div class="progress-wrap" id="images-progress"><div class="prog-meta"><span id="images-prog-txt">Loading…</span><span id="images-prog-pct">0%</span></div><div class="prog-track"><div class="prog-fill" id="images-prog-fill"></div></div></div>
+  <div id="images-results"></div>
+  <div class="history" id="images-history"><div class="history-label">This session</div><div id="images-history-list"></div></div>
+</div>
+
+<!-- GIF -->
+<div class="panel" id="panel-gif">
+  <div class="panel-head">
+    <div class="panel-label">Mode / GIF</div>
+    <div class="panel-title">GIF Downloader</div>
+  </div>
+  <div class="mode-sw">
+    <button class="active" data-mode="direct" onclick="setMode('gif','direct')">Direct URL</button>
+    <button data-mode="scan" onclick="setMode('gif','scan')">Scan Page</button>
+    <button data-mode="convert" onclick="setMode('gif','convert')">Convert</button>
+  </div>
+  <div id="gif-direct">
+    <div class="input-row">
+      <input class="url-input" id="gif-direct-url" placeholder="https://site.com/animation.gif" onkeydown="if(event.key==='Enter')directDownload('gif-direct-url','gif-status','gif-progress',['gif'])"/>
+      <button class="go-btn" onclick="directDownload('gif-direct-url','gif-status','gif-progress',['gif'])">Fetch</button>
+    </div>
+  </div>
+  <div id="gif-scan" style="display:none">
+    <div class="input-row">
+      <input class="url-input" id="gif-scan-url" placeholder="https://site.com/page" onkeydown="if(event.key==='Enter')scanPage('gif-scan-url','gif-status','gif-results','gif')"/>
+      <button class="go-btn" onclick="scanPage('gif-scan-url','gif-status','gif-results','gif')">Scan</button>
+    </div>
+  </div>
+  <!-- GIF INLINE CONVERT -->
+  <div id="gif-convert-inline" style="display:none">
+    <div class="inline-convert-tabs">
+      <button class="inline-convert-tab active" onclick="switchInlineConvert('gif','gif2video')">GIF → Video</button>
+      <button class="inline-convert-tab" onclick="switchInlineConvert('gif','gif2images')">GIF → Images</button>
+    </div>
+    <div class="inline-csec active" id="gif-csec-gif2video">
+      <div class="convert-desc">Upload an animated GIF and convert it to a WebM video.</div>
+      <div class="conv-drop" id="drop-gif2video" onclick="document.getElementById('gif2video-file').click()">
+        <div class="conv-drop-icon">🎞</div>
+        <div class="conv-drop-label">Tap to choose GIF</div>
+        <div class="conv-drop-sub" id="gif2video-fname">.gif files only</div>
+        <input type="file" id="gif2video-file" style="display:none" onclick="event.stopPropagation()" accept=".gif,image/gif" onchange="onConvertFileChange('gif2video')"/>
+      </div>
+      <button class="convert-btn" id="btn-gif2video" onclick="convertMedia('gif2video')">▶ Convert to Video</button>
+      <div class="status" id="gif2video-status"></div>
+      <div id="gif2video-result"></div>
+    </div>
+    <div class="inline-csec" id="gif-csec-gif2images">
+      <div class="convert-desc">Extract frames from an animated GIF and download them as PNG images.</div>
+      <div class="conv-drop" id="drop-gif2images" onclick="document.getElementById('gif2images-file').click()">
+        <div class="conv-drop-icon">🎞</div>
+        <div class="conv-drop-label">Tap to choose GIF</div>
+        <div class="conv-drop-sub" id="gif2images-fname">.gif files only</div>
+        <input type="file" id="gif2images-file" style="display:none" onclick="event.stopPropagation()" accept=".gif,image/gif" onchange="onConvertFileChange('gif2images')"/>
+      </div>
+      <div class="convert-options">
+        <span class="conv-opt-label">Format:</span>
+        <button class="convert-opt-btn active" onclick="setConvertOpt('gif2images-fmt',this,'png')">PNG</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('gif2images-fmt',this,'jpeg')">JPEG</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('gif2images-fmt',this,'webp')">WebP</button>
+      </div>
+      <div class="convert-options">
+        <span class="conv-opt-label">Frames:</span>
+        <button class="convert-opt-btn active" onclick="setConvertOpt('gif2images-frames',this,'all')">All</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('gif2images-frames',this,'first')">First only</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('gif2images-frames',this,'10')">Max 10</button>
+      </div>
+      <button class="convert-btn" id="btn-gif2images" onclick="convertMedia('gif2images')">▶ Extract Frames</button>
+      <div class="status" id="gif2images-status"></div>
+      <div id="gif2images-result"></div>
+    </div>
+  </div>
+  <div class="scanning" id="gif-scanning"><div class="pulse"><span></span><span></span><span></span></div><span id="gif-scan-txt">Scanning…</span></div>
+  <div class="status" id="gif-status"></div>
+  <div class="progress-wrap" id="gif-progress"><div class="prog-meta"><span id="gif-prog-txt">Loading…</span><span id="gif-prog-pct">0%</span></div><div class="prog-track"><div class="prog-fill" id="gif-prog-fill"></div></div></div>
+  <div id="gif-results"></div>
+  <div class="history" id="gif-history"><div class="history-label">This session</div><div id="gif-history-list"></div></div>
+</div>
+
+<!-- WEBP -->
+<div class="panel" id="panel-webp">
+  <div class="panel-head">
+    <div class="panel-label">Mode / WebP</div>
+    <div class="panel-title">WebP Downloader</div>
+  </div>
+  <div class="mode-sw">
+    <button class="active" data-mode="direct" onclick="setMode('webp','direct')">Direct URL</button>
+    <button data-mode="scan" onclick="setMode('webp','scan')">Scan Page</button>
+    <button data-mode="convert" onclick="setMode('webp','convert')">Convert</button>
+  </div>
+  <div id="webp-direct">
+    <div class="input-row">
+      <input class="url-input" id="webp-direct-url" placeholder="https://site.com/image.webp" onkeydown="if(event.key==='Enter')directDownload('webp-direct-url','webp-status','webp-progress',['webp'])"/>
+      <button class="go-btn" onclick="directDownload('webp-direct-url','webp-status','webp-progress',['webp'])">Fetch</button>
+    </div>
+  </div>
+  <div id="webp-scan" style="display:none">
+    <div class="input-row">
+      <input class="url-input" id="webp-scan-url" placeholder="https://site.com/gallery" onkeydown="if(event.key==='Enter')scanPage('webp-scan-url','webp-status','webp-results','webp')"/>
+      <button class="go-btn" onclick="scanPage('webp-scan-url','webp-status','webp-results','webp')">Scan</button>
+    </div>
+  </div>
+  <!-- WEBP INLINE CONVERT -->
+  <div id="webp-convert-inline" style="display:none">
+    <div class="inline-convert-tabs">
+      <button class="inline-convert-tab active" onclick="switchInlineConvert('webp','webp2images')">WebP → Images</button>
+      <button class="inline-convert-tab" onclick="switchInlineConvert('webp','webp2gif')">WebP → GIF</button>
+      <button class="inline-convert-tab" onclick="switchInlineConvert('webp','webp2video')">WebP → Video</button>
+    </div>
+    <div class="inline-csec active" id="webp-csec-webp2images">
+      <div class="convert-desc">Upload an animated WebP and extract every frame as JPEG, PNG, or BMP images.</div>
+      <div class="conv-drop" id="drop-webp2images" onclick="document.getElementById('webp2images-file').click()">
+        <div class="conv-drop-icon">🌐</div>
+        <div class="conv-drop-label">Tap to choose WebP</div>
+        <div class="conv-drop-sub" id="webp2images-fname">.webp files only</div>
+        <input type="file" id="webp2images-file" style="display:none" onclick="event.stopPropagation()" accept=".webp,image/webp" onchange="onConvertFileChange('webp2images')"/>
+      </div>
+      <div class="convert-options">
+        <span class="conv-opt-label">Format:</span>
+        <button class="convert-opt-btn active" onclick="setConvertOpt('webp2images-fmt',this,'jpeg')">JPEG</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('webp2images-fmt',this,'png')">PNG</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('webp2images-fmt',this,'bmp')">BMP</button>
+      </div>
+      <div class="convert-options">
+        <span class="conv-opt-label">Quality:</span>
+        <button class="convert-opt-btn" onclick="setConvertOpt('webp2images-quality',this,'60')">Low (60)</button>
+        <button class="convert-opt-btn active" onclick="setConvertOpt('webp2images-quality',this,'85')">Medium (85)</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('webp2images-quality',this,'95')">High (95)</button>
+      </div>
+      <button class="convert-btn" id="btn-webp2images" onclick="convertMedia('webp2images')">▶ Convert Image</button>
+      <div class="status" id="webp2images-status"></div>
+      <div id="webp2images-result"></div>
+    </div>
+    <div class="inline-csec" id="webp-csec-webp2gif">
+      <div class="convert-desc">Upload an animated WebP and convert all its frames into an animated GIF — timing preserved.</div>
+      <div class="conv-drop" id="drop-webp2gif" onclick="document.getElementById('webp2gif-file').click()">
+        <div class="conv-drop-icon">🌐</div>
+        <div class="conv-drop-label">Tap to choose WebP</div>
+        <div class="conv-drop-sub" id="webp2gif-fname">.webp files only</div>
+        <input type="file" id="webp2gif-file" style="display:none" onclick="event.stopPropagation()" accept=".webp,image/webp" onchange="onConvertFileChange('webp2gif')"/>
+      </div>
+      <button class="convert-btn" id="btn-webp2gif" onclick="convertMedia('webp2gif')">▶ Convert to GIF</button>
+      <div class="status" id="webp2gif-status"></div>
+      <div id="webp2gif-result"></div>
+    </div>
+    <div class="inline-csec" id="webp-csec-webp2video">
+      <div class="convert-desc">Upload an animated WebP and convert it to a WebM video — all frames and timing preserved.</div>
+      <div class="conv-drop" id="drop-webp2video" onclick="document.getElementById('webp2video-file').click()">
+        <div class="conv-drop-icon">🌐</div>
+        <div class="conv-drop-label">Tap to choose WebP</div>
+        <div class="conv-drop-sub" id="webp2video-fname">.webp files only</div>
+        <input type="file" id="webp2video-file" style="display:none" onclick="event.stopPropagation()" accept=".webp,image/webp" onchange="onConvertFileChange('webp2video')"/>
+      </div>
+      <button class="convert-btn" id="btn-webp2video" onclick="convertMedia('webp2video')">▶ Convert to Video</button>
+      <div class="status" id="webp2video-status"></div>
+      <div id="webp2video-result"></div>
+    </div>
+  </div>
+  <div class="scanning" id="webp-scanning"><div class="pulse"><span></span><span></span><span></span></div><span id="webp-scan-txt">Scanning…</span></div>
+  <div class="status" id="webp-status"></div>
+  <div class="progress-wrap" id="webp-progress"><div class="prog-meta"><span id="webp-prog-txt">Loading…</span><span id="webp-prog-pct">0%</span></div><div class="prog-track"><div class="prog-fill" id="webp-prog-fill"></div></div></div>
+  <div id="webp-results"></div>
+  <div class="history" id="webp-history"><div class="history-label">This session</div><div id="webp-history-list"></div></div>
+</div>
+
+<!-- VIDEO -->
+<div class="panel" id="panel-video">
+  <div class="panel-head">
+    <div class="panel-label">Mode / Video</div>
+    <div class="panel-title">Video Downloader</div>
+  </div>
+  <div class="mode-sw">
+    <button class="active" data-mode="direct" onclick="setMode('video','direct')">Direct URL</button>
+    <button data-mode="scan" onclick="setMode('video','scan')">Scan Page</button>
+    <button data-mode="convert" onclick="setMode('video','convert')">Convert</button>
+  </div>
+  <div id="video-direct">
+    <div class="input-row">
+      <input class="url-input" id="video-direct-url" placeholder="https://site.com/video.mp4" onkeydown="if(event.key==='Enter')directDownload('video-direct-url','video-status','video-progress',['mp4','webm','mkv','avi','mov','flv','wmv','m4v','3gp'])"/>
+      <button class="go-btn" onclick="directDownload('video-direct-url','video-status','video-progress',['mp4','webm','mkv','avi','mov','flv','wmv','m4v','3gp'])">Fetch</button>
+    </div>
+  </div>
+  <div id="video-scan" style="display:none">
+    <div class="input-row">
+      <input class="url-input" id="video-scan-url" placeholder="https://site.com/page" onkeydown="if(event.key==='Enter')scanPage('video-scan-url','video-status','video-results','video')"/>
+      <button class="go-btn" onclick="scanPage('video-scan-url','video-status','video-results','video')">Scan</button>
+    </div>
+  </div>
+  <!-- VIDEO INLINE CONVERT -->
+  <div id="video-convert-inline" style="display:none">
+    <div class="inline-convert-tabs">
+      <button class="inline-convert-tab active" onclick="switchInlineConvert('video','v2gif')">Video → GIF</button>
+      <button class="inline-convert-tab" onclick="switchInlineConvert('video','v2img')">Video → Images</button>
+      <button class="inline-convert-tab" onclick="switchInlineConvert('video','v2audio')">Video → Audio</button>
+    </div>
+    <div class="inline-csec active" id="video-csec-v2gif">
+      <div class="convert-desc">Upload a video and convert it to an animated GIF — no internet needed.</div>
+      <div class="conv-drop" id="drop-v2gif" onclick="document.getElementById('v2gif-file').click()">
+        <div class="conv-drop-icon">🎬</div>
+        <div class="conv-drop-label">Tap to choose video</div>
+        <div class="conv-drop-sub" id="v2gif-fname">MP4, WebM, MOV, AVI…</div>
+        <input type="file" id="v2gif-file" style="display:none" onclick="event.stopPropagation()" accept="video/*" onchange="onConvertFileChange('v2gif')"/>
+      </div>
+      <div class="convert-options">
+        <span class="conv-opt-label">FPS:</span>
+        <button class="convert-opt-btn active" onclick="setConvertOpt('v2gif-fps',this,'8')">8</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2gif-fps',this,'12')">12</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2gif-fps',this,'20')">20</button>
+      </div>
+      <div class="convert-options">
+        <span class="conv-opt-label">Quality:</span>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2gif-size',this,'240');setConvertOpt('v2gif-colors',null,'64')">Low</button>
+        <button class="convert-opt-btn active" onclick="setConvertOpt('v2gif-size',this,'320');setConvertOpt('v2gif-colors',null,'128')">Medium</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2gif-size',this,'480');setConvertOpt('v2gif-colors',null,'192')">High</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2gif-size',this,'640');setConvertOpt('v2gif-colors',null,'256')">Ultra</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2gif-size',this,'1080');setConvertOpt('v2gif-colors',null,'256')">1080p</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2gif-size',this,'1440');setConvertOpt('v2gif-colors',null,'256')">1440p</button>
+      </div>
+      <div class="convert-options">
+        <span class="conv-opt-label">Dither:</span>
+        <button class="convert-opt-btn active" onclick="setConvertOpt('v2gif-dither',this,'none')">None</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2gif-dither',this,'fs')">Floyd-Steinberg</button>
+      </div>
+      <div class="convert-options">
+        <span class="conv-opt-label">Duration:</span>
+        <button class="convert-opt-btn active" onclick="setConvertOpt('v2gif-dur',this,'3')">3s</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2gif-dur',this,'5')">5s</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2gif-dur',this,'10')">10s</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2gif-dur',this,'999')">Full</button>
+      </div>
+      <button class="convert-btn" id="btn-v2gif" onclick="convertMedia('v2gif')">▶ Convert to GIF</button>
+      <div class="status" id="v2gif-status"></div>
+      <div id="v2gif-result"></div>
+    </div>
+    <div class="inline-csec" id="video-csec-v2img">
+      <div class="convert-desc">Upload a video and extract individual frames as PNG images.</div>
+      <div class="conv-drop" id="drop-v2img" onclick="document.getElementById('v2img-file').click()">
+        <div class="conv-drop-icon">🎬</div>
+        <div class="conv-drop-label">Tap to choose video</div>
+        <div class="conv-drop-sub" id="v2img-fname">MP4, WebM, MOV, AVI…</div>
+        <input type="file" id="v2img-file" style="display:none" onclick="event.stopPropagation()" accept="video/*" onchange="onConvertFileChange('v2img')"/>
+      </div>
+      <div class="convert-options">
+        <span class="conv-opt-label">Every:</span>
+        <button class="convert-opt-btn active" onclick="setConvertOpt('v2img-interval',this,'1')">1s</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2img-interval',this,'2')">2s</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2img-interval',this,'5')">5s</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2img-interval',this,'10')">10s</button>
+      </div>
+      <div class="convert-options">
+        <span class="conv-opt-label">Max frames:</span>
+        <button class="convert-opt-btn active" onclick="setConvertOpt('v2img-max',this,'20')">20</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2img-max',this,'50')">50</button>
+        <button class="convert-opt-btn" onclick="setConvertOpt('v2img-max',this,'999')">All</button>
+      </div>
+      <button class="convert-btn" id="btn-v2img" onclick="convertMedia('v2img')">▶ Extract Frames</button>
+      <div class="status" id="v2img-status"></div>
+      <div id="v2img-result"></div>
+    </div>
+    <div class="inline-csec" id="video-csec-v2audio">
+      <div class="convert-desc">Upload a video and extract its audio track as a WAV file.</div>
+      <div class="conv-drop" id="drop-v2audio" onclick="document.getElementById('v2audio-file').click()">
+        <div class="conv-drop-icon">🎬</div>
+        <div class="conv-drop-label">Tap to choose video</div>
+        <div class="conv-drop-sub" id="v2audio-fname">MP4, WebM, MOV…</div>
+        <input type="file" id="v2audio-file" style="display:none" onclick="event.stopPropagation()" accept="video/*" onchange="onConvertFileChange('v2audio')"/>
+      </div>
+      <button class="convert-btn" id="btn-v2audio" onclick="convertMedia('v2audio')">▶ Extract Audio</button>
+      <div class="status" id="v2audio-status"></div>
+      <div id="v2audio-result"></div>
+    </div>
+  </div>
+  <div class="scanning" id="video-scanning"><div class="pulse"><span></span><span></span><span></span></div><span id="video-scan-txt">Scanning…</span></div>
+  <div class="status" id="video-status"></div>
+  <div class="progress-wrap" id="video-progress"><div class="prog-meta"><span id="video-prog-txt">Loading…</span><span id="video-prog-pct">0%</span></div><div class="prog-track"><div class="prog-fill" id="video-prog-fill"></div></div></div>
+  <div id="video-results"></div>
+  <div class="history" id="video-history"><div class="history-label">This session</div><div id="video-history-list"></div></div>
+</div>
+
+<!-- AUDIO -->
+<div class="panel" id="panel-audio">
+  <div class="panel-head">
+    <div class="panel-label">Mode / Audio</div>
+    <div class="panel-title">Audio Downloader</div>
+  </div>
+  <div class="mode-sw">
+    <button class="active" data-mode="direct" onclick="setMode('audio','direct')">Direct URL</button>
+    <button data-mode="scan" onclick="setMode('audio','scan')">Scan Page</button>
+    <button data-mode="convert" onclick="setMode('audio','convert')">Convert</button>
+  </div>
+  <div id="audio-direct">
+    <div class="input-row">
+      <input class="url-input" id="audio-direct-url" placeholder="https://site.com/track.mp3" onkeydown="if(event.key==='Enter')directDownload('audio-direct-url','audio-status','audio-progress',['mp3','wav','ogg','flac','aac','m4a','opus','wma'])"/>
+      <button class="go-btn" onclick="directDownload('audio-direct-url','audio-status','audio-progress',['mp3','wav','ogg','flac','aac','m4a','opus','wma'])">Fetch</button>
+    </div>
+  </div>
+  <div id="audio-scan" style="display:none">
+    <div class="input-row">
+      <input class="url-input" id="audio-scan-url" placeholder="https://site.com/page" onkeydown="if(event.key==='Enter')scanPage('audio-scan-url','audio-status','audio-results','audio')"/>
+      <button class="go-btn" onclick="scanPage('audio-scan-url','audio-status','audio-results','audio')">Scan</button>
+    </div>
+  </div>
+  <!-- AUDIO INLINE CONVERT -->
+  <div id="audio-convert-inline" style="display:none">
+    <div class="inline-convert-tabs">
+      <button class="inline-convert-tab active" onclick="switchInlineConvert('audio','v2audio')">Video → Audio</button>
+    </div>
+    <div class="inline-csec active" id="audio-csec-v2audio">
+      <div class="convert-desc">Extract the audio track from a video file and save it as a WAV — no internet needed.</div>
+      <div class="conv-drop" id="drop-a-v2audio" onclick="document.getElementById('a-v2audio-file').click()">
+        <div class="conv-drop-icon">🎬</div>
+        <div class="conv-drop-label">Tap to choose video</div>
+        <div class="conv-drop-sub" id="a-v2audio-fname">MP4, WebM, MOV…</div>
+        <input type="file" id="a-v2audio-file" style="display:none" onclick="event.stopPropagation()" accept="video/*" onchange="onConvertFileChangePrefixed('a-v2audio')"/>
+      </div>
+      <button class="convert-btn" id="btn-a-v2audio" onclick="convertMediaPrefixed('a-v2audio','v2audio')">▶ Extract Audio</button>
+      <div class="status" id="a-v2audio-status"></div>
+      <div id="a-v2audio-result"></div>
+    </div>
+  </div>
+  <div class="scanning" id="audio-scanning"><div class="pulse"><span></span><span></span><span></span></div><span id="audio-scan-txt">Scanning…</span></div>
+  <div class="status" id="audio-status"></div>
+  <div class="progress-wrap" id="audio-progress"><div class="prog-meta"><span id="audio-prog-txt">Loading…</span><span id="audio-prog-pct">0%</span></div><div class="prog-track"><div class="prog-fill" id="audio-prog-fill"></div></div></div>
+  <div id="audio-results"></div>
+  <div class="history" id="audio-history"><div class="history-label">This session</div><div id="audio-history-list"></div></div>
+</div>
+
+<!-- PDF -->
+<div class="panel" id="panel-pdf">
+  <div class="panel-head">
+    <div class="panel-label">Mode / PDF</div>
+    <div class="panel-title">PDF Downloader</div>
+  </div>
+  <div class="mode-sw">
+    <button class="active" data-mode="direct" onclick="setMode('pdf','direct')">Direct URL</button>
+    <button data-mode="scan" onclick="setMode('pdf','scan')">Scan Page</button>
+  </div>
+  <div id="pdf-direct">
+    <div class="input-row">
+      <input class="url-input" id="pdf-direct-url" placeholder="https://site.com/document.pdf" onkeydown="if(event.key==='Enter')directDownload('pdf-direct-url','pdf-status','pdf-progress',['pdf'])"/>
+      <button class="go-btn" onclick="directDownload('pdf-direct-url','pdf-status','pdf-progress',['pdf'])">Fetch</button>
+    </div>
+  </div>
+  <div id="pdf-scan" style="display:none">
+    <div class="input-row">
+      <input class="url-input" id="pdf-scan-url" placeholder="https://site.com/page" onkeydown="if(event.key==='Enter')scanPage('pdf-scan-url','pdf-status','pdf-results','pdf')"/>
+      <button class="go-btn" onclick="scanPage('pdf-scan-url','pdf-status','pdf-results','pdf')">Scan</button>
+    </div>
+  </div>
+  <div class="scanning" id="pdf-scanning"><div class="pulse"><span></span><span></span><span></span></div><span id="pdf-scan-txt">Scanning…</span></div>
+  <div class="status" id="pdf-status"></div>
+  <div class="progress-wrap" id="pdf-progress"><div class="prog-meta"><span id="pdf-prog-txt">Loading…</span><span id="pdf-prog-pct">0%</span></div><div class="prog-track"><div class="prog-fill" id="pdf-prog-fill"></div></div></div>
+  <div id="pdf-results"></div>
+  <div class="history" id="pdf-history"><div class="history-label">This session</div><div id="pdf-history-list"></div></div>
+</div>
+
+<!-- WEBPAGE -->
+<div class="panel active" id="panel-webpage">
+  <div class="panel-head">
+    <div class="panel-label">Mode / Webpage</div>
+    <div class="panel-title">Webpage Media</div>
+  </div>
+  <div class="input-row">
+    <input class="url-input" id="webpage-url" placeholder="https://site.com/page" onkeydown="if(event.key==='Enter')downloadWebpage()"/>
+    <button class="go-btn" id="webpage-btn" onclick="downloadWebpage()">Scan</button>
+  </div>
+  <div class="scanning" id="webpage-scanning"><div class="pulse"><span></span><span></span><span></span></div><span id="webpage-scan-txt">Scanning…</span></div>
+  <div class="status" id="webpage-status"></div>
+  <div id="webpage-results"></div>
+  <div class="history" id="webpage-history"><div class="history-label">This session</div><div id="webpage-history-list"></div></div>
+</div>
+
+</main>
+
+<!-- ═══════════════ SECTION 2 — CSS ═══════════════ -->
+<style>
+/* ── SYSTEM FONT STACK — no external requests ── */
+:root{
+  --font-sans:'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif;
+  --font-mono:'JetBrains Mono','Fira Code','Cascadia Code','Consolas','Courier New',monospace;
+}
+*, *::before, *::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#080c0a;
+  --bg2:#0d120f;
+  --line:#1a2420;
+  --line2:#243028;
+  --text:#e8f5e8;
+  --muted:#4a6655;
+  --muted2:#2a3830;
+  --green:#00ff88;
+  --green2:#00cc66;
+  --green-dim:#00ff8822;
+  --green-glow:rgba(0,255,136,0.12);
+  --active-bg:#00ff88;
+  --active-text:#080c0a;
+  --ok:#00ff88;
+  --err:#ff4455;
+  --warn:#ffcc00;
+}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-sans);
+  min-height:100vh;
+  font-size:15px;
+  line-height:1.6;
+}
+/* ── SCANLINE OVERLAY ── */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,0.015) 2px,rgba(0,255,136,0.015) 4px);
+  pointer-events:none;
+  z-index:0;
+  will-change:transform;
+  contain:strict;
+}
+/* ── HEADER ── */
+header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  height:58px;
+  border-bottom:1px solid var(--line);
+  position:sticky;
+  top:0;
+  z-index:20;
+  background:var(--bg);
+}
+.logo{
+  font-family:var(--font-mono);
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:0.04em;
+  color:var(--green);
+  text-shadow:0 0 18px rgba(0,255,136,0.4);
+}
+.logo em{color:var(--muted);font-style:normal;font-weight:400;}
+/* ── STATUS INDICATOR ── */
+.status-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  animation:blink 2s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+/* ── TABS ── */
+.tabs-wrap{
+  border-bottom:1px solid var(--line);
+  overflow-x:auto;
+  scrollbar-width:none;
+  position:sticky;
+  top:58px;
+  z-index:19;
+  background:var(--bg);
+}
+.tabs-wrap::-webkit-scrollbar{display:none;}
+.tabs{
+  display:flex;
+  padding:0 12px;
+  width:max-content;
+  min-width:100%;
+}
+.tab{
+  padding:16px 16px 14px;
+  font-family:var(--font-mono);
+  font-size:11px;
+  font-weight:400;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  background:none;
+  border:none;
+  border-bottom:2px solid transparent;
+  cursor:pointer;
+  transition:color .15s, border-color .15s, text-shadow .15s;
+  white-space:nowrap;
+}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--green);border-bottom-color:var(--green);text-shadow:0 0 10px rgba(0,255,136,0.5);}
+/* ── MAIN ── */
+main{
+  max-width:640px;
+  margin:0 auto;
+  padding:32px 20px 80px;
+  position:relative;
+  z-index:1;
+}
+.panel{display:none;}
+.panel.active{display:block;}
+/* ── SECTION HEAD ── */
+.panel-head{
+  margin-bottom:28px;
+  padding-bottom:20px;
+  border-bottom:1px solid var(--line);
+}
+.panel-label{
+  font-family:var(--font-mono);
+  font-size:9px;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:var(--green2);
+  margin-bottom:8px;
+  opacity:.7;
+}
+.panel-title{
+  font-size:26px;
+  font-weight:600;
+  color:var(--text);
+  letter-spacing:-0.01em;
+}
+/* ── MODE SWITCH ── */
+.mode-sw{
+  display:flex;
+  gap:0;
+  border:1px solid var(--line2);
+  border-radius:6px;
+  overflow:hidden;
+  width:fit-content;
+  margin-bottom:20px;
+}
+.mode-sw button{
+  padding:9px 18px;
+  font-family:var(--font-mono);
+  font-size:10px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  background:none;
+  border:none;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .15s;
+  border-right:1px solid var(--line2);
+}
+.mode-sw button:last-child{border-right:none;}
+.mode-sw button.active{background:var(--green);color:var(--bg);}
+/* ── INPUT ── */
+.input-row{display:flex;gap:8px;margin-bottom:10px;}
+.url-input{
+  flex:1;
+  background:var(--bg2);
+  border:1px solid var(--line2);
+  border-radius:6px;
+  padding:13px 15px;
+  color:var(--green);
+  font-family:var(--font-mono);
+  font-size:12px;
+  outline:none;
+  transition:border-color .2s, box-shadow .2s;
+  min-width:0;
+}
+.url-input:focus{border-color:var(--green2);box-shadow:0 0 0 3px var(--green-dim);}
+.url-input::placeholder{color:var(--muted2);}
+.go-btn{
+  padding:13px 20px;
+  background:var(--green);
+  color:var(--bg);
+  border:none;
+  border-radius:6px;
+  font-family:var(--font-mono);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.06em;
+  cursor:pointer;
+  transition:opacity .15s, box-shadow .15s;
+  white-space:nowrap;
+  flex-shrink:0;
+}
+.go-btn:hover{opacity:.9;box-shadow:0 0 16px rgba(0,255,136,0.3);}
+.go-btn:disabled{opacity:.25;cursor:not-allowed;box-shadow:none;}
+/* ── STATUS ── */
+.status{
+  display:none;
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:0.02em;
+  padding:11px 14px;
+  border-radius:5px;
+  margin-bottom:14px;
+  line-height:1.7;
+}
+.status.info{display:block;color:var(--muted);border:1px solid var(--line2);}
+.status.success{display:block;color:var(--ok);border:1px solid rgba(0,255,136,0.25);background:rgba(0,255,136,0.05);}
+.status.error{display:block;color:var(--err);border:1px solid rgba(255,68,85,0.25);background:rgba(255,68,85,0.05);}
+.status.warn{display:block;color:var(--warn);border:1px solid rgba(255,204,0,0.25);background:rgba(255,204,0,0.05);}
+/* ── PROGRESS ── */
+.progress-wrap{display:none;margin-bottom:14px;}
+.prog-meta{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:9px;color:var(--green2);margin-bottom:7px;}
+.prog-track{height:2px;background:var(--line2);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--green);border-radius:2px;width:0%;transition:width .2s;box-shadow:0 0 6px var(--green);}
+/* ── SCAN ANIM ── */
+.scanning{display:none;align-items:center;gap:10px;margin-bottom:14px;font-family:var(--font-mono);font-size:10px;color:var(--green2);}
+.scanning.show{display:flex;}
+.pulse{display:flex;gap:4px;}
+.pulse span{
+  width:4px;height:4px;border-radius:50%;background:var(--green);
+  animation:pulse 1.2s ease-in-out infinite;
+  box-shadow:0 0 5px var(--green);
+}
+.pulse span:nth-child(2){animation-delay:.2s;}
+.pulse span:nth-child(3){animation-delay:.4s;}
+@keyframes pulse{0%,80%,100%{opacity:.15;transform:scale(.6);}40%{opacity:1;transform:scale(1);}}
+/* ── RESULTS ── */
+.results-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:14px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--line);
+}
+.results-count{font-family:var(--font-mono);font-size:10px;color:var(--green2);letter-spacing:0.08em;text-transform:uppercase;}
+.preview-all-btn{
+  font-family:var(--font-mono);
+  font-size:9px;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  background:none;
+  border:1px solid var(--line2);
+  border-radius:4px;
+  color:var(--muted);
+  padding:6px 12px;
+  cursor:pointer;
+  transition:all .15s;
+}
+.preview-all-btn:hover{border-color:var(--green2);color:var(--green);}
+/* ── MEDIA GRID (images) ── */
+.media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:20px;}
+.media-card{
+  border:1px solid var(--line);
+  border-radius:6px;
+  overflow:hidden;
+  background:var(--bg2);
+  transition:border-color .2s;
+}
+.media-card:hover{border-color:var(--green2);}
+.media-thumb{width:100%;height:88px;object-fit:cover;display:block;background:var(--bg2);}
+.media-info{padding:8px 10px;}
+.media-name{font-family:var(--font-mono);font-size:8px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:6px;}
+.media-dl-btn{
+  width:100%;
+  padding:7px;
+  background:var(--bg);
+  border:1px solid var(--line2);
+  border-radius:4px;
+  color:var(--green2);
+  font-family:var(--font-mono);
+  font-size:8px;
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all .15s;
+}
+.media-dl-btn:hover{border-color:var(--green);color:var(--green);box-shadow:0 0 8px var(--green-dim);}
+/* ── MEDIA LIST ── */
+/* ── OPTIONS ── */
+.opt-label{
+  font-family:var(--font-mono);
+  font-size:9px;
+  color:var(--green2);
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  display:block;
+  margin-bottom:10px;
+  opacity:.8;
+}
+/* ── HISTORY ── */
+.history{margin-top:28px;border-top:1px solid var(--line);padding-top:20px;display:none;}
+.history-label{font-family:var(--font-mono);font-size:9px;color:var(--green2);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:12px;opacity:.7;}
+.history-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 0;
+  border-bottom:1px solid var(--line);
+  font-family:var(--font-mono);font-size:10px;
+}
+.history-item:last-child{border-bottom:none;}
+.h-dot{width:4px;height:4px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 5px var(--green);}
+.h-name{color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.h-size{color:var(--muted);}
+/* ── EMPTY ── */
+.empty{text-align:center;padding:48px 0;color:var(--muted2);font-family:var(--font-mono);font-size:10px;line-height:2.5;}
+/* ── DEPTH BTNS ── */
+/* ── PREVIEW CARD ── */
+.preview-card{
+  border:1px solid var(--line2);
+  border-radius:8px;
+  padding:16px;
+  margin-top:6px;
+  background:var(--bg2);
+}
+.preview-meta-name{font-family:var(--font-mono);font-size:11px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px;}
+.preview-meta-sub{font-family:var(--font-mono);font-size:9px;color:var(--green2);margin-bottom:14px;opacity:.8;}
+.save-btn{
+  width:100%;
+  padding:13px;
+  background:var(--green);
+  color:var(--bg);
+  border:none;
+  border-radius:5px;
+  font-family:var(--font-mono);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.06em;
+  cursor:pointer;
+  transition:opacity .15s, box-shadow .15s;
+}
+.save-btn:hover{opacity:.9;box-shadow:0 0 18px rgba(0,255,136,0.35);}
+html, body{scrollbar-width:none;-ms-overflow-style:none;}
+::-webkit-scrollbar{width:0;height:0;display:none;background:transparent;}
+::-webkit-scrollbar-track, ::-webkit-scrollbar-thumb{background:transparent;}
+/* ── QUALITY POPUP ── */
+@keyframes qfadein{from{opacity:0;}to{opacity:1;}}
+@keyframes qslidein{from{transform:translateY(60px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+/* ── UPLOAD BUTTON ── */
+/* ── CONVERT PANEL ── */
+.convert-tabs{
+  display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px;
+}
+.convert-tab{
+  padding:7px 14px;
+  font-family:var(--font-mono);
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  background:var(--bg2);
+  border:1px solid var(--line2);
+  border-radius:5px;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .15s;
+  white-space:nowrap;
+}
+.convert-tab:hover{border-color:var(--green2);color:var(--text);}
+.convert-tab.active{background:var(--green-dim);border-color:var(--green);color:var(--green);text-shadow:0 0 8px rgba(0,255,136,0.4);}
+.convert-desc{
+  font-family:var(--font-mono);
+  font-size:9px;
+  color:var(--muted);
+  letter-spacing:0.06em;
+  margin-bottom:16px;
+  line-height:1.8;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:5px;
+  background:var(--bg2);
+}
+.convert-btn{
+  width:100%;
+  padding:13px;
+  background:none;
+  border:1px solid var(--green2);
+  border-radius:6px;
+  color:var(--green);
+  font-family:var(--font-mono);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all .2s;
+  margin-top:10px;
+}
+.convert-btn:hover{background:var(--green-dim);box-shadow:0 0 16px rgba(0,255,136,0.2);}
+.convert-btn:disabled{opacity:.25;cursor:not-allowed;box-shadow:none;}
+.convert-options{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.convert-opt-btn{
+  padding:6px 12px;
+  font-family:var(--font-mono);
+  font-size:9px;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  background:var(--bg2);
+  border:1px solid var(--line2);
+  border-radius:4px;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .15s;
+}
+.convert-opt-btn.active{background:var(--green-dim);border-color:var(--green);color:var(--green);}
+/* ── CONV DROP ZONE ── */
+.conv-drop{
+  border:2px dashed var(--line2);
+  border-radius:10px;
+  padding:28px 16px;
+  text-align:center;
+  cursor:pointer;
+  margin-bottom:16px;
+  transition:border-color .2s, background .2s;
+  background:var(--bg2);
+}
+.conv-drop:hover{border-color:var(--green);background:var(--green-dim);}
+.conv-drop.has-file{border-color:var(--green2);border-style:solid;}
+.conv-drop-icon{font-size:32px;margin-bottom:8px;}
+.conv-drop-label{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--text);letter-spacing:0.04em;margin-bottom:4px;}
+.conv-drop-sub{font-family:var(--font-mono);font-size:9px;color:var(--green2);letter-spacing:0.04em;}
+/* ── INLINE CONVERT TABS ── */
+.inline-convert-tabs{
+  display:flex;gap:0;
+  border:1px solid var(--line2);
+  border-radius:6px;
+  overflow:hidden;
+  width:fit-content;
+  margin-bottom:18px;
+  flex-wrap:wrap;
+}
+.inline-convert-tab{
+  padding:9px 16px;
+  font-family:var(--font-mono);
+  font-size:10px;
+  letter-spacing:0.07em;
+  text-transform:uppercase;
+  background:none;
+  border:none;
+  border-right:1px solid var(--line2);
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .15s;
+  white-space:nowrap;
+}
+.inline-convert-tab:last-child{border-right:none;}
+.inline-convert-tab.active{background:var(--green-dim);color:var(--green);border-color:var(--green2);}
+.inline-convert-tab:hover:not(.active){color:var(--text);}
+.inline-csec{display:none;}
+.inline-csec.active{display:block;}
+/* ═══ REDESIGN v2: bigger, roomier, softer palette ═══ */
+:root{
+  --bg:#0a0f14;--bg2:#111a24;--line:#1d2a38;--line2:#2b3b4c;
+  --text:#f2f7fb;--muted:#8ea3b6;--muted2:#53667a;
+  --green:#34e8ac;--green2:#26c791;--green-dim:#34e8ac26;--green-glow:rgba(52,232,172,.14);
+  --active-bg:#34e8ac;--active-text:#04130d;
+}
+body{font-size:17px;line-height:1.65;background:radial-gradient(900px 520px at 50% -140px,rgba(52,232,172,.12),transparent 70%),var(--bg);}
+body::after{display:none;}
+header{height:76px;padding:0 24px;background:rgba(10,15,20,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);}
+.logo{font-size:24px;letter-spacing:.01em;}
+.status-dot{width:12px;height:12px;}
+.tab{padding:22px 24px;font-size:14px;letter-spacing:.08em;}
+.tab.active{text-shadow:none;border-bottom-width:3px;}
+main{max-width:720px;padding:40px 22px 110px;}
+.panel-head{margin-bottom:34px;padding-bottom:26px;}
+.panel-label{font-size:12px;letter-spacing:.14em;color:var(--green2);}
+.panel-title{font-size:36px;line-height:1.15;letter-spacing:-.02em;margin-top:8px;}
+.input-row{gap:12px;margin-bottom:18px;}
+.url-input{padding:20px 22px;font-size:16px;border-radius:16px;background:var(--bg2);border:1.5px solid var(--line2);}
+.url-input:focus{border-color:var(--green);box-shadow:0 0 0 4px var(--green-dim);}
+.url-input::placeholder{color:var(--muted2);}
+.go-btn{padding:0 30px;font-size:15px;font-weight:700;border-radius:16px;letter-spacing:.06em;background:linear-gradient(135deg,#34e8ac,#1fc4d8);color:#04130d;border:none;}
+.go-btn:hover{box-shadow:0 8px 24px rgba(52,232,172,.28);}
+.status{padding:18px 22px;font-size:15px;border-radius:14px;margin:6px 0 18px;}
+.history-label, .opt-label{font-size:12px;letter-spacing:.14em;}
+.media-grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px;margin-bottom:28px;}
+.media-card{border-radius:20px;background:var(--bg2);border:1px solid var(--line2);box-shadow:0 10px 30px rgba(0,0,0,.32);}
+.media-card:hover{border-color:var(--green2);}
+.media-card .wp-m{background:#070b10;}
+.media-card .wp-m.media-thumb{height:auto;min-height:150px;max-height:300px;object-fit:contain;}
+.media-info{padding:16px 18px 18px;}
+.media-name{font-family:var(--font-sans);font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.wp-info{display:grid;grid-template-columns:1fr 1fr;gap:14px 12px;margin:14px 0 18px;padding-top:14px;border-top:1px solid var(--line2);}
+.wp-row{display:block;min-width:0;padding:0;border:none;font-family:var(--font-sans);letter-spacing:0;line-height:1.3;}
+.wp-row span{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.wp-row b{display:block;color:var(--text);font-size:16px;font-weight:600;text-align:left;overflow-wrap:anywhere;font-variant-numeric:tabular-nums;}
+.media-card{min-width:0;}
+.media-info{min-width:0;}
+@media(max-width:480px){
+.media-grid{grid-template-columns:repeat(2,1fr);gap:14px;}
+.media-info{padding:14px;}
+.panel-title{font-size:32px;}
+}
+/* ═══ Fixed header + tab bar (never scroll away) ═══ */
+header{position:fixed;top:0;left:0;right:0;z-index:30;box-sizing:border-box;}
+.tabs-wrap{position:fixed;left:0;right:0;top:76px;z-index:29;background:var(--bg);}
+main{padding-top:calc(var(--bars-h,150px) + 32px);}
+/* ═══ Header polish ═══ */
+header{height:84px;padding:0 22px;background:linear-gradient(180deg,rgba(13,22,18,.97),rgba(8,12,10,.92));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line2);box-shadow:0 6px 24px rgba(0,0,0,.35);}
+.brand{display:flex;align-items:center;gap:14px;min-width:0;}
+.brand-mark{flex:none;width:48px;height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#34e8ac,#1fc4d8);color:#04130d;box-shadow:0 6px 18px rgba(52,232,172,.32);}
+.brand-text{min-width:0;line-height:1.15;}
+.logo{font-size:22px;font-weight:800;letter-spacing:-.01em;text-shadow:none;white-space:nowrap;}
+.live-pill{flex:none;display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;border:1px solid var(--line2);background:rgba(52,232,172,.08);font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;color:var(--green);}
+.live-pill .status-dot{width:9px;height:9px;}
+@media(max-width:380px){
+.live-pill{display:none;}
+}
+/* ═══ Header polish 2 ═══ */
+header{height:80px;border-bottom:none;position:fixed;}
+header::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent,rgba(52,232,172,.85) 30%,rgba(31,196,216,.85) 70%,transparent);opacity:.8;}
+.brand{gap:14px;}
+.brand-mark{width:52px;height:52px;border-radius:16px;box-shadow:0 8px 22px rgba(52,232,172,.38),inset 0 1px 0 rgba(255,255,255,.35);}
+.brand-mark svg{width:26px;height:26px;}
+.logo{font-size:27px;line-height:1;font-weight:800;letter-spacing:-.02em;background:linear-gradient(90deg,#eafff6,#34e8ac 60%,#1fc4d8);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.logo em{-webkit-text-fill-color:var(--muted);color:var(--muted);font-weight:500;}
+.live-pill{padding:10px 16px;font-size:13px;font-weight:700;background:rgba(52,232,172,.1);border-color:rgba(52,232,172,.35);box-shadow:0 0 18px rgba(52,232,172,.12);}
+@media(max-width:400px){
+.logo{font-size:23px;}
+.brand-mark{width:46px;height:46px;}
+}
+/* ═══ Safe area ═══ */
+:root{--safe-top:env(safe-area-inset-top,0px);}
+header{box-sizing:border-box;height:calc(80px + var(--safe-top));padding-top:var(--safe-top);}
+/* ═══ Base ═══ */
+html, body{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;}
+/* ═══ Narrow phones: keep logo and status pill from colliding ═══ */
+@media(max-width:420px){
+header{padding-left:14px;padding-right:14px;}
+.brand{gap:10px;}
+.brand-mark{width:42px;height:42px;border-radius:13px;}
+.logo{font-size:20px;}
+.live-pill{padding:7px 11px;font-size:11px;gap:6px;}
+}
+@media(max-width:340px){
+.live-pill{display:none;}
+}
+.status{-webkit-user-select:text;user-select:text;}
+/* ═══ Header + tab bar scroll away with the page ═══ */
+header{position:relative !important;top:auto !important;left:auto !important;right:auto !important;}
+.tabs-wrap{position:relative !important;top:auto !important;left:auto !important;right:auto !important;}
+main{padding-top:32px !important;}
+</style>
+
+<!-- ═══════════════ SECTION 3 — JS ═══════════════ -->
+<script>
+/* ── 3.0 Compatibility: Promise.any for older browsers ── */
+if(!Promise.any){
+  Promise.any=function(ps){
+    return new Promise(function(resolve,reject){
+      var errs=[],n=0,arr=Array.from(ps);
+      if(!arr.length)return reject(new Error('All promises were rejected'));
+      arr.forEach(function(p,i){
+        Promise.resolve(p).then(resolve,function(e){
+          errs[i]=e;if(++n===arr.length){var err=new Error('All promises were rejected');err.errors=errs;reject(err);}
+        });
+      });
+    });
+  };
+}
+
+/* ── 3.1 Blob URL cleanup ── */
+(function(){
+  const urls=new Set();const orig=URL.createObjectURL.bind(URL);
+  URL.createObjectURL=function(o){const u=orig(o);urls.add(u);return u;};
+  window.addEventListener('pagehide',function(e){if(e&&e.persisted)return;urls.forEach(u=>{try{URL.revokeObjectURL(u);}catch(err){}});urls.clear();});
+})();
+
+/* ── 3.2 Main app logic ── */
+/* ── SAFETY HELPERS: everything from the network is untrusted ── */
+function esc(v){return String(v==null?'':v).replace(/[&<>"'`]/g,function(c){return '&#'+c.charCodeAt(0)+';';});}
+function enc(v){return encodeURIComponent(String(v)).replace(/[!'()*]/g,function(c){return '%'+c.charCodeAt(0).toString(16).toUpperCase();});}
+function safeDecode(v){try{return decodeURIComponent(v);}catch(e){return String(v);}}
+function cleanName(n){
+  n=String(n==null?'':n).replace(/[\u0000-\u001f\u007f\\\/:*?"<>|]/g,'_').replace(/^[.\s]+/,'').trim();
+  if(n.length>120){const i=n.lastIndexOf('.');const ext=(i>0&&n.length-i<=8)?n.slice(i):'';n=n.slice(0,120-ext.length)+ext;}
+  return n||'downloaded_file';
+}
+const dlHistory={};
+
+function switchCat(name){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  const catBtn=document.getElementById('cat-'+name);
+  if(catBtn){catBtn.classList.add('active');const wrap=catBtn.closest('.tabs-wrap');if(wrap)wrap.scrollTo({left:catBtn.offsetLeft-(wrap.clientWidth-catBtn.offsetWidth)/2,behavior:'smooth'});}
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  const panel=document.getElementById('panel-'+name);
+  if(panel)panel.classList.add('active');
+}
+
+function setMode(cat,mode){
+  const panel=document.getElementById('panel-'+cat);
+  const btns=panel.querySelectorAll('.mode-sw button');
+  btns.forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+  const directEl=document.getElementById(cat+'-direct');
+  const scanEl=document.getElementById(cat+'-scan');
+  const convertEl=document.getElementById(cat+'-convert-inline');
+  if(directEl)directEl.style.display=mode==='direct'?'block':'none';
+  if(scanEl)scanEl.style.display=mode==='scan'?'block':'none';
+  if(convertEl)convertEl.style.display=mode==='convert'?'block':'none';
+  const res=document.getElementById(cat+'-results');
+  if(res)res.innerHTML='';
+  const st=document.getElementById(cat+'-status');
+  if(st){st.className='status';st.textContent='';}
+}
+
+
+function setStatus(id,msg,type){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className='status '+type;}
+
+function formatBytes(b){if(!b||b===0)return'';if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(1)+' KB';return(b/1048576).toFixed(2)+' MB';}
+
+function getFilename(url,cd){
+  if(cd){const m=cd.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);if(m)return cleanName(safeDecode(m[1].replace(/['"]/g,'')));}
+  try{const p=new URL(url).pathname.split('/');const n=p[p.length-1];if(n&&n.includes('.'))return cleanName(safeDecode(n));}catch(e){}
+  return'downloaded_file';
+}
+
+
+function addHistory(cat,name,size){
+  if(!dlHistory[cat])dlHistory[cat]=[];
+  dlHistory[cat].unshift({name,size});
+  const box=document.getElementById(cat+'-history');
+  const list=document.getElementById(cat+'-history-list');
+  if(!box||!list)return;
+  box.style.display='block';
+  list.innerHTML=dlHistory[cat].slice(0,6).map(h=>`<div class="history-item"><div class="h-dot"></div><span class="h-name">${esc(h.name)}</span><span class="h-size">${esc(h.size)}</span></div>`).join('');
+}
+
+async function fetchCascade(url,opts={},onProgress=null){
+  const report=s=>{if(onProgress)onProgress(s);};
+  report('Trying direct…');
+  const attempts=1, wait=8000;
+  for(let n=0;n<attempts;n++){
+    try{
+      const ac=new AbortController();
+      const tid=setTimeout(()=>ac.abort(),wait);
+      const r=await fetch(url,{...opts,signal:ac.signal,mode:'cors',credentials:'omit',referrerPolicy:'no-referrer'});
+      clearTimeout(tid);
+      if(r.ok){report('Connected directly');return{response:r,via:'direct'};}
+      if(r.status>=400&&r.status<500)break; /* real answer from the site: don't retry */
+    }catch(e){
+      /* CORS / network failure is instant: retrying is pointless, go to proxies. Only retry real timeouts. */
+      if(e&&e.name==='AbortError'&&n+1<attempts)report('Slow connection, retrying…');
+      else break;
+    }
+  }
+  report('Trying proxies…');
+  const PROXY_LIST=[
+    u=>`https://corsproxy.io/?url=${enc(u)}`,
+    u=>`https://corsproxy.io/?${enc(u)}`,
+    u=>`https://api.allorigins.win/raw?url=${enc(u)}`,
+    u=>`https://api.codetabs.com/v1/proxy/?quest=${enc(u)}`,
+    u=>`https://yacdn.org/proxy/${u}`,
+    u=>`https://cors.eu.org/${u}`,
+    u=>`https://api.cors.lol/?url=${enc(u)}`,
+  ];
+  /* Race proxies with per-proxy timeout; first good response wins */
+  const acs=PROXY_LIST.map(()=>new AbortController());
+  const proxyAttempts=PROXY_LIST.map((fn,i)=>{
+    const tid=setTimeout(()=>acs[i].abort(),20000);
+    return fetch(fn(url),{...opts,signal:acs[i].signal})
+      .then(r=>{
+        clearTimeout(tid);
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        const ct=(r.headers.get('content-type')||'').toLowerCase();
+        /* Reject proxy error pages masquerading as the file */
+        if(ct.includes('application/json')&&!/\.json(\?|$)/i.test(url)&&r.headers.get('content-length')&&parseInt(r.headers.get('content-length'))<600)throw new Error('Proxy error');
+        acs.forEach((a,j)=>{if(j!==i)a.abort();});
+        return{response:r,via:'proxy'};
+      })
+      .catch(e=>{clearTimeout(tid);throw e;});
+  });
+  try{return await Promise.any(proxyAttempts);}
+  catch(e){
+    acs.forEach(a=>a.abort());
+    throw new Error('Could not fetch (blocked by site or proxies down). Tap to open the URL directly: '+url);
+  }
+}
+
+function fetchWithTimeout(u,ms){
+  const ac=new AbortController();const t=setTimeout(()=>ac.abort(),ms);
+  return fetch(u,{signal:ac.signal}).then(r=>{clearTimeout(t);if(!r.ok)throw new Error('HTTP '+r.status);return r;}).catch(e=>{clearTimeout(t);throw e;});
+}
+
+/* Get a page's HTML as text. Races: direct/proxy cascade, allorigins JSON, and the r.jina.ai reader. */
+async function fetchPageText(url,onProgress){
+  if(onProgress)onProgress('Fetching page…');
+  const viaCascade=fetchCascade(url,{},onProgress).then(async({response,via})=>{
+    const text=await response.text();
+    if(!text||text.length<50)throw new Error('empty');
+    return{text,via};
+  });
+  const viaAllOrigins=fetchWithTimeout('https://api.allorigins.win/get?url='+enc(url),20000)
+    .then(r=>r.json()).then(j=>{if(!j.contents||j.contents.length<50)throw new Error('empty');return{text:j.contents,via:'proxy'};});
+  const viaReader=fetchWithTimeout('https://r.jina.ai/'+url,25000)
+    .then(r=>r.text()).then(t=>{if(!t||t.length<50)throw new Error('empty');return{text:t,via:'reader'};});
+  try{return await Promise.any([viaCascade,viaAllOrigins,viaReader]);}
+  catch(e){throw new Error(navigator.onLine===false?'No internet connection. Check Wi-Fi or VPN.':'Could not load this page. The site blocks it or all free proxies are down. Try again in a minute, or another link.');}
+}
+
+async function directDownload(inputId,statusId,progressId,allowedExts){
+  const url=document.getElementById(inputId).value.trim();
+  if(!url){setStatus(statusId,'⚠ Paste a URL first.','error');return;}
+  if(!/^https?:\/\//i.test(url)){setStatus(statusId,'⚠ URL must start with http:// or https://','error');return;}
+  const cat=statusId.replace('-status','');
+  let ext='';
+  try{const seg=new URL(url).pathname.toLowerCase().split('/').pop();ext=seg.includes('.')?seg.split('.').pop():'';}catch(e){setStatus(statusId,'⚠ Invalid URL.','error');return;}
+  if(allowedExts.length>0&&ext&&!allowedExts.includes(ext)){setStatus(statusId,'⚠ .'+ext+' detected — use the correct tab for that type.','warn');return;}
+  const catKind={images:'image',gif:'gif',webp:'webp',video:'video',audio:'audio',pdf:'pdf'}[cat]||'image';
+  const kind=['gif','webp','pdf'].includes(ext)?ext:catKind;
+  const resultsEl=document.getElementById(cat+'-results');
+  const pw=document.getElementById(progressId);if(pw)pw.style.display='none';
+  if(resultsEl){
+    resultsEl.innerHTML='';
+    const grid=document.createElement('div');grid.className='media-grid';
+    grid.appendChild(wpCard({url,name:getFilename(url,null),ext},kind,cat));
+    resultsEl.appendChild(grid);
+  }
+  setStatus(statusId,'Ready — tap Save to download','success');
+}
+
+
+function saveBlob(blobUrl,encodedName,cat){
+  const name=safeDecode(encodedName);
+  const a=document.createElement('a');
+  a.href=blobUrl+'#'+Date.now();
+  a.download=name;
+  a.style.display='none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>document.body.removeChild(a),500);
+  addHistory(cat,name,'');
+  return Promise.resolve();
+}
+
+async function scanPage(inputId,statusId,resultsId,type){
+  const url=document.getElementById(inputId).value.trim();
+  if(!url){setStatus(statusId,'⚠ Paste a page URL.','error');return;}
+  if(!url.startsWith('http')){setStatus(statusId,'⚠ URL must start with http://','error');return;}
+  const cat=statusId.replace('-status','');
+  const scanningEl=document.getElementById(cat+'-scanning');
+  const txtEl=document.getElementById(cat+'-scan-txt');
+  const resultsEl=document.getElementById(resultsId);
+  if(scanningEl)scanningEl.classList.add('show');
+  resultsEl.innerHTML='';
+  setStatus(statusId,'','');
+  document.getElementById(statusId).className='status';
+  if(txtEl)txtEl.textContent='Connecting…';
+  try{
+    const{text:html,via}=await fetchPageText(url,msg=>{if(txtEl)txtEl.textContent=msg;});
+    if(txtEl)txtEl.textContent='Parsing…';
+    const groups=extractPageMedia(html,new URL(url));
+    const map={image:['image','webp'],gif:['gif'],webp:['webp'],video:['video'],audio:['audio'],pdf:['pdf']};
+    const found=[];(map[type]||[type]).forEach(k=>(groups[k]||[]).forEach(it=>found.push({it,k})));
+    if(scanningEl)scanningEl.classList.remove('show');
+    if(found.length===0){setStatus(statusId,'⚠ No '+type+' files found. Site may load media via JavaScript.','warn');return;}
+    setStatus(statusId,found.length+' file(s) found'+(via!=='direct'?' · proxy':''),'success');
+    resultsEl.innerHTML='';
+    const grid=document.createElement('div');grid.className='media-grid';
+    found.forEach(x=>grid.appendChild(wpCard(x.it,x.k,cat)));
+    resultsEl.appendChild(grid);
+  }catch(err){if(scanningEl)scanningEl.classList.remove('show');setStatus(statusId,'❌ '+err.message,'error');}
+}
+
+
+
+
+
+const WP_EXT={
+  image:['jpg','jpeg','png','svg','bmp','tiff','avif'],
+  gif:['gif'],
+  webp:['webp'],
+  video:['mp4','webm','mkv','avi','mov','flv','wmv','m4v','3gp','ogv'],
+  audio:['mp3','wav','ogg','flac','aac','m4a','opus','wma'],
+  pdf:['pdf']
+};
+const WP_SMALL=/(favicon|sprite|spacer|blank\.|pixel|1x1|\bicons?\b|\/icons?\/|logo-?small|emoji|badge|loading\.|placeholder)/i;
+let wpHideSmall=true,wpFilter='all',wpGroups=null;
+const wpTag=(k,i)=>(i.ext||k).toUpperCase();
+let wpItems=[];
+const wpFmtDur=t=>{t=Math.round(t);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');};
+
+function wpCard(item,kind,cat){
+  item.cat=cat||'webpage';
+  const idx=wpItems.push(item)-1;
+  const card=document.createElement('div');
+  card.className='media-card';
+  let media;
+  if(kind==='pdf')media='<div class="wp-m" style="height:150px;display:flex;align-items:center;justify-content:center;font-size:54px;">📄</div>';
+  else if(kind==='video')media='<video class="wp-m" src="'+esc(item.url)+'" controls muted playsinline preload="metadata" referrerpolicy="no-referrer" style="width:100%;max-height:220px;border-radius:5px;background:#000;display:block;"></video>';
+  else if(kind==='audio')media='<audio class="wp-m" src="'+esc(item.url)+'" controls preload="metadata" referrerpolicy="no-referrer" style="width:100%;margin:8px 0;"></audio>';
+  else media='<img class="wp-m media-thumb" src="'+esc(item.url)+'" loading="lazy" referrerpolicy="no-referrer" alt="" style="width:100%;object-fit:contain;display:block;"/>';
+  card.innerHTML=media+'<div class="media-info"><div class="media-name"></div><div class="wp-info"></div><button class="save-btn" onclick="wpSave(this,'+idx+')">↓ Save</button></div>';
+  card.querySelector('.media-name').textContent=item.name;
+  const info=card.querySelector('.wp-info');
+  const parts={dim:'',dur:'',size:'checking…'};
+  const upd=()=>{
+    const rows=[['Type',wpTag(kind,item)],['Size',parts.size],['Dimensions',parts.dim],['Length',parts.dur]].filter(r=>r[1]);
+    info.innerHTML=rows.map(r=>'<div class="wp-row"><span>'+esc(r[0])+'</span><b>'+esc(r[1])+'</b></div>').join('');
+  };
+  upd();
+  const m=card.querySelector('.wp-m');
+  if(kind==='image'||kind==='gif'||kind==='webp')m.onload=()=>{parts.dim=m.naturalWidth+'×'+m.naturalHeight;upd();};
+  if(kind==='video')m.onloadedmetadata=()=>{if(m.videoWidth)parts.dim=m.videoWidth+'×'+m.videoHeight;if(isFinite(m.duration))parts.dur=wpFmtDur(m.duration);upd();};
+  if(kind==='audio')m.onloadedmetadata=()=>{if(isFinite(m.duration))parts.dur=wpFmtDur(m.duration);upd();};
+  m.onerror=()=>{if(kind==='image'||kind==='gif'||kind==='webp'){m.style.display='none';parts.dim='n/a';upd();}};
+  wpHead(item.url).then(n=>{parts.size=n?formatBytes(n):'unknown';upd();});
+  return card;
+}
+
+/* Size lookup, 4 at a time. Works when the site allows it; silently skipped otherwise. */
+let wpHeadActive=0;const wpHeadWaiters=[];
+async function wpHead(url){
+  while(wpHeadActive>=4)await new Promise(r=>wpHeadWaiters.push(r));
+  wpHeadActive++;
+  try{
+    const ac=new AbortController();const t=setTimeout(()=>ac.abort(),6000);
+    const r=await fetch(url,{method:'HEAD',signal:ac.signal,credentials:'omit',referrerPolicy:'no-referrer'});
+    clearTimeout(t);
+    return r.ok?parseInt(r.headers.get('content-length')||'0'):0;
+  }catch(e){return 0;}
+  finally{wpHeadActive--;const w=wpHeadWaiters.shift();if(w)w();}
+}
+
+async function wpSave(btn,idx){
+  const item=wpItems[idx];if(!item)return;
+  const old=btn.textContent;btn.disabled=true;btn.textContent='Saving…';
+  try{
+    const{response}=await fetchCascade(item.url);
+    const blob=await response.blob();
+    await saveBlob(URL.createObjectURL(blob),enc(item.name),item.cat||'webpage');
+    btn.textContent='✓ Saved';
+  }catch(e){
+    const a=document.createElement('a');a.href=item.url;a.target='_blank';a.rel='noopener';a.download=item.name;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    btn.textContent='↗ Opened — long-press to save';
+  }
+  setTimeout(()=>{btn.disabled=false;if(btn.textContent.indexOf('✓')===0)btn.textContent=old;},2500);
+}
+
+function wpRender(){
+  const resultsEl=document.getElementById('webpage-results');
+  if(!wpGroups)return;
+  resultsEl.innerHTML='';wpItems=[];
+  const bar=document.createElement('div');
+  bar.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px;align-items:center;';
+  const chip=(label,on,fn)=>{const b=document.createElement('button');b.textContent=label;b.style.cssText='padding:7px 12px;border-radius:999px;border:1px solid var(--green);background:'+(on?'var(--green)':'transparent')+';color:'+(on?'#000':'var(--green)')+';font-family:var(--font-mono);font-size:11px;';b.onclick=fn;bar.appendChild(b);};
+  const vis=k=>wpGroups[k].filter(i=>!(wpHideSmall&&WP_SMALL.test(i.url)));
+  const total=Object.keys(WP_LABEL).reduce((n,k)=>n+vis(k).length,0);
+  chip('All '+total,wpFilter==='all',()=>{wpFilter='all';wpRender();});
+  Object.keys(WP_LABEL).forEach(k=>{const n=vis(k).length;if(n)chip(WP_LABEL[k]+' '+n,wpFilter===k,()=>{wpFilter=k;wpRender();});});
+  chip(wpHideSmall?'Icons hidden':'Icons shown',false,()=>{wpHideSmall=!wpHideSmall;wpRender();});
+  resultsEl.appendChild(bar);
+  setStatus('webpage-status',total+' media file(s) shown','success');
+  Object.keys(WP_LABEL).forEach(kind=>{
+    if(wpFilter!=='all'&&wpFilter!==kind)return;
+    const items=vis(kind);
+    if(!items.length)return;
+    const sec=document.createElement('div');
+    sec.style.marginTop='14px';
+    sec.innerHTML='<div class="history-label" style="margin-bottom:8px;">'+WP_LABEL[kind]+'</div><div class="wp-group"></div>';
+    resultsEl.appendChild(sec);
+    const grp=sec.querySelector('.wp-group');
+    grp.className='wp-group media-grid';
+    items.forEach(it=>grp.appendChild(wpCard(it,kind)));
+  });
+}
+const WP_LABEL={image:'Images',gif:'GIFs',webp:'WebP',video:'Videos',audio:'Audio'};
+
+function extractPageMedia(html,baseUrl){
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  /* honour <base href> if present */
+  let base=baseUrl;
+  const bh=doc.querySelector('base[href]');
+  if(bh){try{base=new URL(bh.getAttribute('href'),baseUrl);}catch(e){}}
+  const extToKind={};
+  Object.keys(WP_EXT).forEach(k=>WP_EXT[k].forEach(e=>extToKind[e]=k));
+  const groups={image:new Map(),gif:new Map(),webp:new Map(),video:new Map(),audio:new Map(),pdf:new Map()};
+  function add(raw){
+    if(!raw)return;
+    raw=String(raw).trim().replace(/\\\//g,'/').replace(/\\u002F/gi,'/').replace(/&amp;/g,'&');
+    if(!raw||/^(data:|javascript:|blob:|#)/i.test(raw))return;
+    let u;try{u=new URL(raw,base);}catch(e){return;}
+    if(u.protocol!=='http:'&&u.protocol!=='https:')return;
+    u.hash='';
+    const path=u.pathname.toLowerCase();
+    const ext=path.includes('.')?path.split('.').pop():'';
+    const kind=extToKind[ext];
+    if(!kind)return;
+    const abs=u.href;
+    if(groups[kind].has(abs))return;
+    let name=abs.split('/').pop().split('?')[0];
+    try{name=safeDecode(name);}catch(e){}
+    groups[kind].set(abs,{url:abs,name:name||abs,ext});
+  }
+  function addSrcset(v){
+    if(!v)return;
+    let best=null,bw=-1;
+    v.split(/,\s+(?=\S)/).forEach(p=>{
+      const parts=p.trim().split(/\s+/);if(!parts[0])return;
+      const d=parts[1]||'';const w=d?parseFloat(d):0;
+      if(w>=bw){bw=w;best=parts[0];}
+    });
+    if(best)add(best);
+  }
+  doc.querySelectorAll('img,source,video,audio,embed,input[type=image]').forEach(el=>{
+    ['src','data-src','data-lazy-src','data-original','data-url','poster','data-poster'].forEach(a=>add(el.getAttribute(a)));
+    ['srcset','data-srcset','data-lazy-srcset'].forEach(a=>addSrcset(el.getAttribute(a)));
+  });
+  doc.querySelectorAll('meta[property="og:image"],meta[property="og:image:url"],meta[property="og:video"],meta[property="og:video:url"],meta[property="og:audio"],meta[name="twitter:image"],meta[name="twitter:player:stream"]').forEach(el=>add(el.getAttribute('content')));
+  doc.querySelectorAll('a[href]').forEach(el=>add(el.getAttribute('href')));
+  doc.querySelectorAll('[style*="url("]').forEach(el=>{
+    const m=(el.getAttribute('style')||'').match(/url\((['"]?)(.*?)\1\)/gi)||[];
+    m.forEach(x=>add(x.replace(/^url\((['"]?)/i,'').replace(/(['"]?)\)$/,'')));
+  });
+  /* Catch media referenced inside inline JSON / scripts (lazy-loaded pages) */
+  const exts=Object.values(WP_EXT).flat().join('|');
+  const re=new RegExp('(?:https?:)?//[^\\s"\'<>()\\\\]+?\\.(?:'+exts+')(?![\\w.\\/-])(?:\\?[^\\s"\'<>()\\\\]*)?','gi');
+  (html.replace(/\\\//g,'/').match(re)||[]).forEach(add);
+  return Object.fromEntries(Object.entries(groups).map(([k,m])=>[k,[...m.values()]]));
+}
+
+async function downloadWebpage(){
+  const url=document.getElementById('webpage-url').value.trim();
+  if(!url){setStatus('webpage-status','⚠ Paste a URL.','error');return;}
+  if(!url.startsWith('http')){setStatus('webpage-status','⚠ URL must start with http:// or https://','error');return;}
+  const btn=document.getElementById('webpage-btn');
+  const scanEl=document.getElementById('webpage-scanning');
+  const txtEl=document.getElementById('webpage-scan-txt');
+  const resultsEl=document.getElementById('webpage-results');
+  btn.disabled=true;scanEl.classList.add('show');resultsEl.innerHTML='';
+  setStatus('webpage-status','','');
+  if(txtEl)txtEl.textContent='Connecting…';
+  try{
+    const{text:html,via}=await fetchPageText(url,msg=>{if(txtEl)txtEl.textContent=msg;});
+    if(txtEl)txtEl.textContent='Finding media…';
+    const groups=extractPageMedia(html,new URL(url));
+    scanEl.classList.remove('show');
+    const total=Object.keys(WP_LABEL).reduce((n,k)=>n+(groups[k]?groups[k].length:0),0);
+    if(!total){setStatus('webpage-status','⚠ No images, videos or audio found. The site may load media with JavaScript.','warn');return;}
+    wpGroups=groups;wpFilter='all';wpRender();
+  }catch(err){scanEl.classList.remove('show');setStatus('webpage-status','❌ '+err.message,'error');}
+  finally{btn.disabled=false;}
+}
+
+
+
+/* ── UPLOAD HANDLER ── */
+
+/* ── CONVERT: SECTION SWITCHER ── */
+const convertOpts={};
+function switchInlineConvert(panel,id){
+  const wrap=document.getElementById(panel+'-convert-inline');
+  if(!wrap)return;
+  wrap.querySelectorAll('.inline-convert-tab').forEach(b=>b.classList.remove('active'));
+  wrap.querySelectorAll('.inline-csec').forEach(s=>s.classList.remove('active'));
+  const activeTab=wrap.querySelector('.inline-convert-tab[onclick*="\''+id+'\'"]');
+  if(activeTab)activeTab.classList.add('active');
+  const activeSec=document.getElementById(panel+'-csec-'+id);
+  if(activeSec)activeSec.classList.add('active');
+}
+function setConvertOpt(key,btn,val){
+  convertOpts[key]=val;
+  if(btn){
+    btn.parentElement.querySelectorAll('.convert-opt-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+}
+function onConvertFileChange(id){
+  const input=document.getElementById(id+'-file');
+  const nameEl=document.getElementById(id+'-fname');
+  const drop=document.getElementById('drop-'+id);
+  if(!input||!input.files.length)return;
+  const files=input.files;
+  const label=files.length===1?files[0].name+' ('+formatBytes(files[0].size)+')':files.length+' files selected';
+  if(nameEl)nameEl.textContent='📎 '+label;
+  if(drop)drop.classList.add('has-file');
+}
+/* Variant for elements with a custom prefix (e.g. audio panel re-uses v2audio logic) */
+function onConvertFileChangePrefixed(prefixedId){
+  const input=document.getElementById(prefixedId+'-file');
+  const nameEl=document.getElementById(prefixedId+'-fname');
+  const drop=document.getElementById('drop-'+prefixedId);
+  if(!input||!input.files.length)return;
+  const files=input.files;
+  const label=files.length===1?files[0].name+' ('+formatBytes(files[0].size)+')':files.length+' files selected';
+  if(nameEl)nameEl.textContent='📎 '+label;
+  if(drop)drop.classList.add('has-file');
+}
+async function convertMediaPrefixed(prefixedId,convertType){
+  const fileInput=document.getElementById(prefixedId+'-file');
+  const resultEl=document.getElementById(prefixedId+'-result');
+  if(resultEl)resultEl.innerHTML='';
+  const files=fileInput?fileInput.files:null;
+  const btn=document.getElementById('btn-'+prefixedId);
+  if(btn)btn.disabled=true;
+  /* Temporarily remap status/result IDs so convertVideoToAudio can find them */
+  const statusEl=document.getElementById(prefixedId+'-status');
+  const _origSetConvStatus=window._convStatusOverride;
+  window._convStatusOverride={id:convertType,prefixedId};
+  try{
+    if(convertType==='v2audio') await convertVideoToAudio(files,resultEl,prefixedId);
+  }catch(err){
+    if(statusEl){statusEl.textContent='❌ '+err.message;statusEl.className='status error';}
+  }finally{
+    window._convStatusOverride=_origSetConvStatus;
+    if(btn)btn.disabled=false;
+  }
+}
+function setConvStatus(id,msg,type){
+  const el=document.getElementById(id+'-status');
+  if(!el)return;el.textContent=msg;el.className='status '+type;
+}
+function dlBlob(blobUrl,fname){
+  fname=cleanName(safeDecode(fname));
+  const a=document.createElement('a');a.href=blobUrl;a.download=fname;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+function convResult(resultEl,previewHtml,fname,meta,blobUrl){
+  resultEl.innerHTML=`<div class="preview-card">${previewHtml}<div class="preview-meta-name">${esc(fname)}</div><div class="preview-meta-sub">${esc(meta)}</div><button class="save-btn" onclick="dlBlob('${blobUrl}','${enc(fname)}')">↓ Download</button></div>`;
+}
+
+/* ── CONVERTER HELPERS ── */
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function loadImg(file,keep){
+  return new Promise((res,rej)=>{
+    const u=URL.createObjectURL(file);const img=new Image();
+    img.onload=()=>{if(!keep)URL.revokeObjectURL(u);res(img);};
+    img.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('Could not read image: '+file.name));};
+    img.src=u;
+  });
+}
+function loadVideoEl(src){
+  return new Promise((res,rej)=>{
+    const v=document.createElement('video');
+    v.muted=true;v.playsInline=true;v.preload='auto';
+    v.onloadedmetadata=()=>res(v);
+    v.onerror=()=>rej(new Error('Could not read this video. The format may not be supported on this device.'));
+    v.src=src;v.load();
+  });
+}
+/* seek with a timeout so a missing "seeked" event can never hang the converter */
+function seekVideo(v,t){
+  return new Promise(r=>{
+    let done=false;
+    const fin=()=>{if(done)return;done=true;v.removeEventListener('seeked',fin);clearTimeout(tm);r();};
+    const tm=setTimeout(fin,4000);
+    v.addEventListener('seeked',fin);
+    v.currentTime=t;
+  });
+}
+function fitEven(w,h,maxSide){
+  const k=Math.min(1,maxSide/Math.max(w,h,1));
+  w=Math.max(2,Math.round(w*k));h=Math.max(2,Math.round(h*k));
+  return{w:w-(w%2),h:h-(h%2)};
+}
+/* Browsers cannot encode BMP from a canvas, so write a 24-bit BMP by hand */
+function canvasToBmpBlob(canvas){
+  const w=canvas.width,h=canvas.height;
+  const d=canvas.getContext('2d').getImageData(0,0,w,h).data;
+  const rowSize=Math.ceil(w*3/4)*4,size=54+rowSize*h;
+  const buf=new ArrayBuffer(size);const v=new DataView(buf);
+  v.setUint8(0,0x42);v.setUint8(1,0x4D);v.setUint32(2,size,true);v.setUint32(10,54,true);
+  v.setUint32(14,40,true);v.setInt32(18,w,true);v.setInt32(22,h,true);v.setUint16(26,1,true);v.setUint16(28,24,true);
+  v.setUint32(34,rowSize*h,true);v.setUint32(38,2835,true);v.setUint32(42,2835,true);
+  const u=new Uint8Array(buf);
+  for(let y=0;y<h;y++){let o=54+(h-1-y)*rowSize;for(let x=0;x<w;x++){const i=(y*w+x)*4;u[o++]=d[i+2];u[o++]=d[i+1];u[o++]=d[i];}}
+  return new Blob([buf],{type:'image/bmp'});
+}
+function canvasBlob(canvas,fmt,q){
+  if(fmt==='bmp')return Promise.resolve(canvasToBmpBlob(canvas));
+  const mime={png:'image/png',jpeg:'image/jpeg',webp:'image/webp'}[fmt]||'image/png';
+  return new Promise((res,rej)=>canvas.toBlob(b=>b?res(b):rej(new Error('Could not encode image.')),mime,(fmt==='jpeg'||fmt==='webp')?q:undefined));
+}
+/* formats without alpha get a white background instead of black */
+function flatten(ctx,fmt,w,h){if(fmt==='jpeg'||fmt==='bmp'){ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);}}
+function makeRecorder(canvas){
+  if(!window.MediaRecorder||!canvas.captureStream)throw new Error('Video recording is not supported in this browser.');
+  const mt=MediaRecorder.isTypeSupported('video/webm;codecs=vp9')?'video/webm;codecs=vp9':(MediaRecorder.isTypeSupported('video/webm')?'video/webm':'');
+  const s0=canvas.captureStream(0);const tr=s0.getVideoTracks()[0];
+  const manual=!!(tr&&tr.requestFrame);
+  const stream=manual?s0:canvas.captureStream(30);
+  const rec=mt?new MediaRecorder(stream,{mimeType:mt}):new MediaRecorder(stream);
+  const chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size>0)chunks.push(e.data);};
+  const stopped=new Promise(r=>{rec.onstop=r;});
+  return{rec,chunks,stopped,frame:()=>{if(manual)tr.requestFrame();}};
+}
+/* total play time of one GIF loop, read from its frame delay blocks */
+function gifLoopMs(b){
+  try{
+    let p=13;if(b[10]&0x80)p+=3*(1<<((b[10]&7)+1));
+    let total=0;
+    while(p<b.length){
+      const t=b[p++];
+      if(t===0x3B)break;
+      if(t===0x21){
+        const lab=b[p++];
+        if(lab===0xF9){const d=(b[p+2]|(b[p+3]<<8))*10;total+=d<20?100:d;}
+        while(p<b.length&&b[p]!==0)p+=b[p]+1;p++;
+      }else if(t===0x2C){
+        p+=8;const f=b[p++];if(f&0x80)p+=3*(1<<((f&7)+1));p++;
+        while(p<b.length&&b[p]!==0)p+=b[p]+1;p++;
+      }else break;
+    }
+    return total;
+  }catch(e){return 0;}
+}
+
+/* ── MAIN DISPATCHER ── */
+async function convertMedia(type){
+  const fileInput=document.getElementById(type+'-file');
+  const resultEl=document.getElementById(type+'-result');
+  if(resultEl)resultEl.innerHTML='';
+  const files=fileInput?fileInput.files:null;
+  const btn=document.getElementById('btn-'+type);
+  if(btn){btn.disabled=true;}
+  try{
+    if(type==='v2gif')    await convertVideoToGif(files,resultEl);
+    else if(type==='v2img')   await convertVideoToImages(files,resultEl);
+    else if(type==='v2audio') await convertVideoToAudio(files,resultEl);
+    else if(type==='gif2video')await convertGifToVideo(files,resultEl);
+    else if(type==='gif2images') await convertGifToImages(files,resultEl);
+    else if(type==='img2gif') await convertImagesToGif(files,resultEl);
+    else if(type==='img2video')await convertImagesToVideo(files,resultEl);
+    else if(type==='webp2images') await convertWebPToImages(files,resultEl);
+    else if(type==='webp2gif')   await convertWebPToGif(files,resultEl);
+    else if(type==='webp2video') await convertWebPToVideo(files,resultEl);
+  }catch(err){setConvStatus(type,'❌ '+err.message,'error');}
+  finally{if(btn)btn.disabled=false;}
+}
+
+function getFileBlob(files){
+  if(!files||files.length===0)throw new Error('No file selected. Tap the upload area first.');
+  return URL.createObjectURL(files[0]);
+}
+
+/* ── INLINE GIF ENCODER — optimized (typed arrays, hash-table LZW, pre-alloc output) ── */
+
+/* Median-cut quantizer — variable color count, optional Floyd-Steinberg dithering */
+function quantizeFrame(imageData,numColors,dither,imgW,imgH){
+  const n=imageData.length>>2;
+  const packed=new Uint32Array(n);
+  let validCount=0;
+  for(let i=0;i<imageData.length;i+=4){
+    if(imageData[i+3]>128)packed[validCount++]=(imageData[i]<<16)|(imageData[i+1]<<8)|imageData[i+2];
+  }
+  if(validCount===0)return{pal:new Uint8Array(numColors*3),indexed:new Uint8Array(n)};
+  const px=packed.subarray(0,validCount);
+
+  const boxes=[{s:0,e:validCount,rMn:0,rMx:0,gMn:0,gMx:0,bMn:0,bMx:0}];
+  function calcBox(b){
+    let rMn=255,rMx=0,gMn=255,gMx=0,bMn=255,bMx=0;
+    for(let i=b.s;i<b.e;i++){const v=px[i];const r=(v>>16)&0xFF,g=(v>>8)&0xFF,bl=v&0xFF;if(r<rMn)rMn=r;if(r>rMx)rMx=r;if(g<gMn)gMn=g;if(g>gMx)gMx=g;if(bl<bMn)bMn=bl;if(bl>bMx)bMx=bl;}
+    b.rMn=rMn;b.rMx=rMx;b.gMn=gMn;b.gMx=gMx;b.bMn=bMn;b.bMx=bMx;
+  }
+  calcBox(boxes[0]);
+  while(boxes.length<numColors){
+    let bigIdx=0,bigRange=-1;
+    for(let bi=0;bi<boxes.length;bi++){const b=boxes[bi];const r=Math.max(b.rMx-b.rMn,b.gMx-b.gMn,b.bMx-b.bMn);if(r>bigRange){bigRange=r;bigIdx=bi;}}
+    if(bigRange===0)break;
+    const b=boxes[bigIdx];
+    const rr=b.rMx-b.rMn,gr=b.gMx-b.gMn,br=b.bMx-b.bMn;
+    const sh=rr>=gr&&rr>=br?16:gr>=br?8:0;
+    px.subarray(b.s,b.e).sort((a,c)=>((a>>sh)&0xFF)-((c>>sh)&0xFF));
+    const mid=(b.s+b.e)>>1;
+    const nb1={s:b.s,e:mid,rMn:0,rMx:0,gMn:0,gMx:0,bMn:0,bMx:0};
+    const nb2={s:mid,e:b.e,rMn:0,rMx:0,gMn:0,gMx:0,bMn:0,bMx:0};
+    calcBox(nb1);calcBox(nb2);
+    boxes.splice(bigIdx,1,nb1,nb2);
+  }
+  const pal=new Uint8Array(numColors*3);
+  const palLen=boxes.length;
+  for(let bi=0;bi<palLen;bi++){
+    const{s,e}=boxes[bi];let r=0,g=0,b=0;
+    for(let i=s;i<e;i++){const v=px[i];r+=(v>>16)&0xFF;g+=(v>>8)&0xFF;b+=v&0xFF;}
+    const cnt=e-s||1;pal[bi*3]=Math.round(r/cnt);pal[bi*3+1]=Math.round(g/cnt);pal[bi*3+2]=Math.round(b/cnt);
+  }
+
+  /* Fast nearest-palette lookup — linear scan with RGB555 cache */
+  function nearestPal(r,g,b){
+    const k5=((r>>3)<<10)|((g>>3)<<5)|(b>>3);
+    if(nearestPal._c[k5]>=0)return nearestPal._c[k5];
+    let best=0,bestD=0x7FFFFFFF;
+    for(let j=0;j<palLen;j++){
+      const dr=r-pal[j*3],dg=g-pal[j*3+1],db=b-pal[j*3+2];
+      const d=dr*dr+dg*dg+db*db;if(d<bestD){bestD=d;best=j;if(d===0)break;}
+    }
+    return(nearestPal._c[k5]=best);
+  }
+  nearestPal._c=new Int16Array(32768).fill(-1);
+
+  const indexed=new Uint8Array(n);
+
+  if(dither==='fs'&&imgW&&imgH){
+    /* Floyd-Steinberg dithering — diffuse quantization error to neighbouring pixels */
+    /* Work on a Float32 copy of the pixel data so errors can go negative */
+    const err=new Float32Array(imageData.length); /* R,G,B,A per pixel */
+    for(let i=0;i<imageData.length;i++)err[i]=imageData[i];
+    for(let y=0;y<imgH;y++){
+      for(let x=0;x<imgW;x++){
+        const pi=y*imgW+x;
+        const ii=pi*4;
+        if(imageData[ii+3]<=128){indexed[pi]=0;continue;}
+        const or=Math.max(0,Math.min(255,Math.round(err[ii])));
+        const og=Math.max(0,Math.min(255,Math.round(err[ii+1])));
+        const ob=Math.max(0,Math.min(255,Math.round(err[ii+2])));
+        const ci=nearestPal(or,og,ob);
+        indexed[pi]=ci;
+        const er=or-pal[ci*3],eg=og-pal[ci*3+1],eb=ob-pal[ci*3+2];
+        /* Distribute error: right 7/16, bottom-left 3/16, bottom 5/16, bottom-right 1/16 */
+        function spread(dx,dy,f){
+          const nx=x+dx,ny=y+dy;
+          if(nx<0||nx>=imgW||ny>=imgH)return;
+          const ni=(ny*imgW+nx)*4;
+          err[ni]+=er*f;err[ni+1]+=eg*f;err[ni+2]+=eb*f;
+        }
+        spread(1,0,7/16);spread(-1,1,3/16);spread(0,1,5/16);spread(1,1,1/16);
+      }
+    }
+  } else {
+    /* No dither — straight nearest-colour mapping */
+    for(let pi=0,i=0;i<imageData.length;i+=4,pi++){
+      if(imageData[i+3]<=128){indexed[pi]=0;continue;}
+      indexed[pi]=nearestPal(imageData[i],imageData[i+1],imageData[i+2]);
+    }
+  }
+
+  return{pal,indexed};
+}
+
+/* LZW encoder — flat Int32Array hash table, no string keys */
+function lzwEncodeTyped(indexedPixels,minCodeSize){
+  const clearCode=1<<minCodeSize;
+  const eofCode=clearCode+1;
+  const HASH_SIZE=16384,HASH_MASK=HASH_SIZE-1;
+  const htKey=new Int32Array(HASH_SIZE).fill(-1);
+  const htVal=new Uint16Array(HASH_SIZE);
+  const maxOut=indexedPixels.length*2+1024;
+  const out=new Uint8Array(maxOut);
+  let outPos=0,buf=0,bufBits=0;
+  let codeSize=minCodeSize+1,maxCode=1<<codeSize;
+  function emit(code){buf|=code<<bufBits;bufBits+=codeSize;while(bufBits>=8){out[outPos++]=buf&0xFF;buf>>>=8;bufBits-=8;}}
+  emit(clearCode);
+  let nextCode=clearCode+2,prev=indexedPixels[0];
+  for(let i=1;i<indexedPixels.length;i++){
+    const px=indexedPixels[i];
+    const rawKey=(prev<<8)|px;
+    let slot=(rawKey*2654435761)&HASH_MASK;
+    while(htKey[slot]!==-1&&htKey[slot]!==rawKey)slot=(slot+1)&HASH_MASK;
+    if(htKey[slot]===rawKey){prev=htVal[slot];}
+    else{
+      emit(prev);
+      if(nextCode<4096){htKey[slot]=rawKey;htVal[slot]=nextCode++;if(nextCode>maxCode&&codeSize<12){codeSize++;maxCode<<=1;}}
+      else{emit(clearCode);htKey.fill(-1);nextCode=clearCode+2;codeSize=minCodeSize+1;maxCode=1<<codeSize;}
+      prev=px;
+    }
+  }
+  emit(prev);emit(eofCode);if(bufBits>0)out[outPos++]=buf&0xFF;
+  return out.subarray(0,outPos);
+}
+
+/* GIF writer — pre-allocated Uint8Array output, async per-frame yields for live progress */
+async function encodeGIF(frames,w,h,delay,onProgress,numColors,dither){
+  numColors=numColors||256;
+  dither=dither||'none';
+  /* colorDepth must be ceiling log2 of numColors, minimum 2 */
+  const colorDepth=numColors<=4?2:numColors<=16?4:numColors<=64?6:numColors<=128?7:8;
+  const palSize=1<<colorDepth; /* actual palette slots written (power of 2 required by GIF spec) */
+  const delayCsFor=fi=>Math.max(2,Math.round((Array.isArray(delay)?delay[fi]:delay)/10));
+  const estSize=800+(palSize*3)+(frames.length*(20+palSize*3+Math.ceil(w*h*1.5)));
+  const out=new Uint8Array(estSize+65536);
+  let pos=0;
+  function wb(b){out[pos++]=b&0xFF;}
+  function ws(n){out[pos++]=n&0xFF;out[pos++]=(n>>8)&0xFF;}
+  function wStr(s){for(let i=0;i<s.length;i++)out[pos++]=s.charCodeAt(i);}
+  function wBlock(data){for(let i=0;i<data.length;i+=255){const e=Math.min(i+255,data.length);out[pos++]=e-i;out.set(data.subarray(i,e),pos);pos+=e-i;}out[pos++]=0;}
+  wStr('GIF89a');ws(w);ws(h);wb(0xF0|(colorDepth-1));wb(0);wb(0);
+  for(let i=0;i<palSize*3;i++)out[pos++]=0; /* placeholder global palette */
+  wb(0x21);wb(0xFF);wb(0x0B);wStr('NETSCAPE2.0');wb(3);wb(1);ws(0);wb(0);
+  for(let fi=0;fi<frames.length;fi++){
+    await new Promise(r=>setTimeout(r,0)); /* yield — keeps UI live, allows progress update */
+    if(onProgress)onProgress(fi,frames.length);
+    const{pal,indexed}=quantizeFrame(frames[fi],numColors,dither,w,h);
+    const lzw=lzwEncodeTyped(indexed,colorDepth);
+    wb(0x21);wb(0xF9);wb(4);wb(0);ws(delayCsFor(fi));wb(0);wb(0);
+    wb(0x2C);ws(0);ws(0);ws(w);ws(h);wb(0x80|(colorDepth-1));
+    /* Write local palette — pad to palSize entries */
+    out.set(pal,pos);pos+=pal.length;
+    /* Pad remaining palette slots with zeros if numColors < palSize */
+    const padBytes=palSize*3-pal.length;if(padBytes>0){out.fill(0,pos,pos+padBytes);pos+=padBytes;}
+    wb(colorDepth);wBlock(lzw);
+  }
+  wb(0x3B);
+  return out.subarray(0,pos);
+}
+
+/* ── VIDEO → GIF ── */
+async function convertVideoToGif(files,resultEl){
+  setConvStatus('v2gif','Loading video…','info');
+  const src=getFileBlob(files);
+  const fps=parseInt(convertOpts['v2gif-fps']||'8');
+  const maxW=parseInt(convertOpts['v2gif-size']||'320');
+  const maxDur=parseInt(convertOpts['v2gif-dur']||'3');
+  const video=await loadVideoEl(src);
+  const dur=Math.min(video.duration,maxDur===999?video.duration:maxDur);
+  if(!isFinite(dur)||dur===0)throw new Error('Could not read video duration.');
+  /* Scale to fit maxW — upscale if source is smaller so quality tier always takes effect */
+  const scale=maxW/video.videoWidth;
+  const w=Math.round(video.videoWidth*scale)||maxW;
+  const h=Math.round(video.videoHeight*scale)||240;
+  const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+  const ctx=canvas.getContext('2d');
+  const frameInterval=1/fps;
+  const wantFrames=Math.max(1,Math.floor(dur*fps));
+  const totalFrames=Math.min(wantFrames,600,Math.max(8,Math.floor(40e6/(w*h))));
+  const trimmed=totalFrames<wantFrames;
+  const frames=[];
+  setConvStatus('v2gif','Capturing frames…','info');
+  for(let i=0;i<totalFrames;i++){
+    await seekVideo(video,i*frameInterval);
+    /* Wait one rAF so the browser has actually painted the frame */
+    await new Promise(r=>requestAnimationFrame(r));
+    ctx.drawImage(video,0,0,w,h);
+    frames.push(ctx.getImageData(0,0,w,h).data);
+    if(i%4===0){setConvStatus('v2gif','Frame '+(i+1)+'/'+totalFrames+'…','info');await new Promise(r=>setTimeout(r,0));}
+  }
+  setConvStatus('v2gif','Encoding GIF…','info');
+  await new Promise(r=>setTimeout(r,0));
+  const numColors=parseInt(convertOpts['v2gif-colors']||'128');
+  const dither=convertOpts['v2gif-dither']||'none';
+  const gifBytes=await encodeGIF(frames,w,h,Math.round(1000/fps),(fi,total)=>{
+    setConvStatus('v2gif','Encoding frame '+(fi+1)+'/'+total+'…','info');
+  },numColors,dither);
+  const blob=new Blob([gifBytes],{type:'image/gif'});
+  const blobUrl=URL.createObjectURL(blob);
+  const size=formatBytes(blob.size);
+  const ditherLabel=dither==='fs'?' · dithered':'';
+  convResult(resultEl,`<img src="${blobUrl}" style="max-width:100%;border-radius:5px;margin-bottom:10px;"/>`,
+    'converted.gif',`${size} · ${w}×${h} · ${fps}fps · ${numColors} colors${ditherLabel}${trimmed?' · trimmed to '+totalFrames+' frames (memory limit)':''}`,blobUrl);
+  setConvStatus('v2gif','✅ Done — '+size,'success');
+}
+
+/* ── VIDEO → IMAGES ── */
+async function convertVideoToImages(files,resultEl){
+  setConvStatus('v2img','Loading video…','info');
+  const src=getFileBlob(files);
+  const interval=parseFloat(convertOpts['v2img-interval']||'1');
+  const maxFrames=parseInt(convertOpts['v2img-max']||'20');
+  const video=await loadVideoEl(src);
+  const dur=video.duration;
+  if(!isFinite(dur)||dur===0)throw new Error('Could not read video duration.');
+  const canvas=document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;
+  const ctx=canvas.getContext('2d');
+  const times=[];
+  for(let t=0;t<dur&&times.length<maxFrames;t+=interval)times.push(parseFloat(t.toFixed(2)));
+  const blobs=[];
+  for(let i=0;i<times.length;i++){
+    await seekVideo(video,times[i]);
+    await new Promise(r=>requestAnimationFrame(r));
+    ctx.drawImage(video,0,0);
+    await new Promise(r=>{canvas.toBlob(b=>{blobs.push({blob:b,t:times[i]});r();},'image/png');});
+    setConvStatus('v2img','Frame '+(i+1)+'/'+times.length+'…','info');
+    if(i%5===0)await new Promise(r=>setTimeout(r,0));
+  }
+  setConvStatus('v2img',blobs.length+' frames ready','success');
+  let html=`<div class="results-meta"><span class="results-count">${blobs.length} frame${blobs.length!==1?'s':''}</span><button class="preview-all-btn" onclick="window._dlAllFrames()">Download All</button></div><div class="media-grid">`;
+  blobs.forEach((item,i)=>{
+    const bu=URL.createObjectURL(item.blob);
+    const fn='frame_'+String(i+1).padStart(3,'0')+'_'+item.t+'s.png';
+    html+=`<div class="media-card"><img class="media-thumb" src="${bu}"/><div class="media-info"><div class="media-name">${esc(fn)}</div><button class="media-dl-btn" onclick="dlBlob('${bu}','${enc(fn)}')">↓ Save</button></div></div>`;
+  });
+  html+='</div>';
+  resultEl.innerHTML=html;
+  window._frameBlobs=blobs;
+}
+window._dlAllFrames=function(){
+  if(!window._frameBlobs)return;
+  window._frameBlobs.forEach((item,i)=>setTimeout(()=>{
+    const bu=URL.createObjectURL(item.blob);
+    dlBlob(bu,'frame_'+String(i+1).padStart(3,'0')+'_'+item.t+'s.png');
+  },i*200));
+};
+
+/* ── VIDEO → AUDIO ── */
+async function convertVideoToAudio(files,resultEl,statusPrefix){
+  const sid=statusPrefix||'v2audio';
+  setConvStatus(sid,'Loading video…','info');
+  if(!files||files.length===0)throw new Error('No file selected. Tap the upload area first.');
+  const buf=await files[0].arrayBuffer();
+  const AudioCtx=window.AudioContext||window.webkitAudioContext;
+  if(!AudioCtx)throw new Error('Web Audio API not supported in this browser.');
+  setConvStatus(sid,'Decoding audio…','info');
+  const actx=new AudioCtx();
+  let decoded;
+  try{decoded=await actx.decodeAudioData(buf);}
+  catch(e){try{actx.close();}catch(_){}throw new Error('Could not decode audio from this file (no audio track, or unsupported format).');}
+  const wavBlob=audioBufferToWav(decoded);
+  const blobUrl=URL.createObjectURL(wavBlob);
+  const size=formatBytes(wavBlob.size);
+  convResult(resultEl,`<audio src="${blobUrl}" controls style="width:100%;margin-bottom:10px;"></audio>`,
+    'audio.wav',`${size} · ${decoded.sampleRate}Hz · ${decoded.numberOfChannels}ch · ${decoded.duration.toFixed(1)}s`,blobUrl);
+  setConvStatus(sid,'✅ Done — '+size,'success');
+  actx.close();
+}
+function audioBufferToWav(buffer){
+  const nc=buffer.numberOfChannels,sr=buffer.sampleRate,len=buffer.length;
+  const ab=new ArrayBuffer(44+len*nc*2);const v=new DataView(ab);
+  function ws(o,s){for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));}
+  ws(0,'RIFF');v.setUint32(4,36+len*nc*2,true);ws(8,'WAVE');
+  ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);
+  v.setUint16(22,nc,true);v.setUint32(24,sr,true);v.setUint32(28,sr*nc*2,true);
+  v.setUint16(32,nc*2,true);v.setUint16(34,16,true);
+  ws(36,'data');v.setUint32(40,len*nc*2,true);
+  let off=44;
+  const chans=[];for(let ch=0;ch<nc;ch++)chans.push(buffer.getChannelData(ch));
+  for(let i=0;i<len;i++)for(let ch=0;ch<nc;ch++){
+    const s=Math.max(-1,Math.min(1,chans[ch][i]));
+    v.setInt16(off,s<0?s*0x8000:s*0x7FFF,true);off+=2;
+  }
+  return new Blob([ab],{type:'audio/wav'});
+}
+
+/* ── GIF → VIDEO ── */
+async function convertGifToVideo(files,resultEl){
+  if(!files||files.length===0)throw new Error('No GIF selected. Tap the upload area first.');
+  setConvStatus('gif2video','Loading GIF…','info');
+  const file=files[0];
+  let frames=null,img=null,w=0,h=0;
+  /* Preferred: decode every frame with its real delay */
+  if(typeof ImageDecoder!=='undefined'){
+    try{
+      const dec=new ImageDecoder({data:await file.arrayBuffer(),type:'image/gif'});
+      await dec.tracks.ready;
+      const n=dec.tracks.selectedTrack.frameCount||1;
+      frames=[];let sum=0;
+      for(let i=0;i<n&&sum<30000;i++){
+        const{image}=await dec.decode({frameIndex:i});
+        let d=Math.round((image.duration||0)/1000);if(d<20)d=100;
+        frames.push({image,dur:d});sum+=d;
+        setConvStatus('gif2video','Decoding frame '+(i+1)+'/'+n+'…','info');
+      }
+      dec.close();
+      w=frames[0].image.displayWidth;h=frames[0].image.displayHeight;
+    }catch(e){(frames||[]).forEach(f=>{try{f.image.close();}catch(_){}});frames=null;}
+  }
+  /* Fallback: let the browser animate the GIF and sample it for one full loop */
+  if(!frames){img=await loadImg(file,true);w=img.naturalWidth||320;h=img.naturalHeight||240;}
+  const dims=fitEven(w,h,1920);w=dims.w;h=dims.h;
+  const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);
+  const m=makeRecorder(canvas);
+  m.rec.start();
+  setConvStatus('gif2video','Recording…','info');
+  let totalMs=0;
+  if(frames){
+    for(const f of frames){
+      ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);ctx.drawImage(f.image,0,0,w,h);
+      m.frame();await sleep(f.dur);totalMs+=f.dur;
+    }
+    ctx.drawImage(frames[frames.length-1].image,0,0,w,h);m.frame();await sleep(150);
+    frames.forEach(f=>{try{f.image.close();}catch(e){}});
+  }else{
+    img.style.cssText='position:fixed;left:0;top:0;width:1px;height:1px;opacity:.01;pointer-events:none;';
+    document.body.appendChild(img);
+    totalMs=Math.min(Math.max(gifLoopMs(new Uint8Array(await file.arrayBuffer())),1000),30000);
+    const t0=performance.now();
+    while(performance.now()-t0<totalMs){ctx.drawImage(img,0,0,w,h);m.frame();await new Promise(r=>requestAnimationFrame(r));}
+    img.remove();
+  }
+  m.rec.stop();await m.stopped;
+  const blob=new Blob(m.chunks,{type:'video/webm'});
+  if(!blob.size)throw new Error('Recording produced no data on this device.');
+  const blobUrl=URL.createObjectURL(blob);
+  const size=formatBytes(blob.size);
+  convResult(resultEl,`<video src="${blobUrl}" controls loop autoplay muted playsinline style="width:100%;border-radius:5px;margin-bottom:10px;max-height:220px;"></video>`,
+    'converted.webm',`${size} · video/webm · ${w}×${h} · ${(totalMs/1000).toFixed(1)}s`,blobUrl);
+  setConvStatus('gif2video','✅ Done — '+size,'success');
+}
+
+/* ── IMAGES → GIF (inline encoder, zero CDN) ── */
+async function convertImagesToGif(files,resultEl){
+  if(!files||files.length===0)throw new Error('No images selected. Tap the upload area first.');
+  const delay=parseInt(convertOpts['img2gif-delay']||'500');
+  const maxW=parseInt(convertOpts['img2gif-width']||'480');
+  setConvStatus('img2gif','Loading images…','info');
+  const imgs=await Promise.all([...files].map(f=>loadImg(f)));
+  const srcW=imgs[0].naturalWidth||1;
+  const srcH=imgs[0].naturalHeight||1;
+  let w=maxW;
+  let h=Math.round(srcH*(w/srcW))||240;
+  /* keep the total pixel count inside a memory budget */
+  let limited=false;
+  if(imgs.length*w*h>40e6){const k=Math.sqrt(40e6/(imgs.length*w*h));w=Math.max(64,Math.floor(w*k));h=Math.max(36,Math.floor(h*k));limited=true;}
+  const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+  const ctx=canvas.getContext('2d');
+  const frames=[];
+  setConvStatus('img2gif','Processing frames…','info');
+  for(let i=0;i<imgs.length;i++){
+    /* fit each image inside the frame without stretching */
+    ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);
+    const iw=imgs[i].naturalWidth||1,ih=imgs[i].naturalHeight||1,sc=Math.min(w/iw,h/ih);
+    ctx.drawImage(imgs[i],(w-iw*sc)/2,(h-ih*sc)/2,iw*sc,ih*sc);
+    frames.push(ctx.getImageData(0,0,w,h).data);
+    await new Promise(r=>setTimeout(r,0));
+  }
+  setConvStatus('img2gif','Encoding GIF…','info');
+  await new Promise(r=>setTimeout(r,0));
+  const numColors=parseInt(convertOpts['img2gif-colors']||'128');
+  const dither=convertOpts['img2gif-dither']||'none';
+  const gifBytes=await encodeGIF(frames,w,h,delay,(fi,total)=>{
+    setConvStatus('img2gif','Encoding frame '+(fi+1)+'/'+total+'…','info');
+  },numColors,dither);
+  const blob=new Blob([gifBytes],{type:'image/gif'});
+  const blobUrl=URL.createObjectURL(blob);
+  const size=formatBytes(blob.size);
+  const ditherLabel=dither==='fs'?' · dithered':'';
+  convResult(resultEl,`<img src="${blobUrl}" style="max-width:100%;border-radius:5px;margin-bottom:10px;"/>`,
+    'animated.gif',`${size} · ${imgs.length} frames · ${delay}ms delay · ${w}×${h} · ${numColors} colors${ditherLabel}${limited?' · downscaled to fit memory':''}`,blobUrl);
+  setConvStatus('img2gif','✅ Done — '+size,'success');
+}
+
+/* ── IMAGES → VIDEO ── */
+async function convertImagesToVideo(files,resultEl){
+  if(!files||files.length===0)throw new Error('No images selected. Tap the upload area first.');
+  const durMs=parseInt(convertOpts['img2video-dur']||'1000');
+  setConvStatus('img2video','Loading images…','info');
+  const imgs=await Promise.all([...files].map(f=>loadImg(f)));
+  let w=Math.max(...imgs.map(i=>i.naturalWidth||640));
+  let h=Math.max(...imgs.map(i=>i.naturalHeight||480));
+  const dims=fitEven(w,h,1920);w=dims.w;h=dims.h;
+  const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+  const ctx=canvas.getContext('2d');
+  const m=makeRecorder(canvas);
+  m.rec.start();
+  for(let i=0;i<imgs.length;i++){
+    setConvStatus('img2video','Slide '+(i+1)+'/'+imgs.length+'…','info');
+    const im=imgs[i],iw=im.naturalWidth||1,ih=im.naturalHeight||1,sc=Math.min(w/iw,h/ih);
+    const t0=performance.now();
+    /* redraw during the hold so the recorder keeps emitting frames and the last slide is not cut short */
+    do{
+      ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);
+      ctx.drawImage(im,(w-iw*sc)/2,(h-ih*sc)/2,iw*sc,ih*sc);
+      m.frame();
+      await sleep(Math.min(100,Math.max(0,durMs-(performance.now()-t0))));
+    }while(performance.now()-t0<durMs);
+  }
+  m.rec.stop();await m.stopped;
+  const blob=new Blob(m.chunks,{type:'video/webm'});
+  if(!blob.size)throw new Error('Recording produced no data on this device.');
+  const blobUrl=URL.createObjectURL(blob);
+  const size=formatBytes(blob.size);
+  convResult(resultEl,`<video src="${blobUrl}" controls playsinline style="width:100%;border-radius:5px;margin-bottom:10px;max-height:220px;"></video>`,
+    'slideshow.webm',`${size} · ${imgs.length} slides · ${durMs/1000}s each · ${w}×${h}`,blobUrl);
+  setConvStatus('img2video','✅ Done — '+size,'success');
+}
+
+
+/* ── WEBP ANIM → IMAGES ── */
+async function convertWebPToImages(files,resultEl){
+  if(!files||files.length===0)throw new Error('No WebP file selected. Tap the upload area first.');
+  const fmt=convertOpts['webp2images-fmt']||'jpeg';
+  const quality=parseFloat(convertOpts['webp2images-quality']||'85')/100;
+  const mimeMap={jpeg:'image/jpeg',png:'image/png',bmp:'image/bmp'};
+  const mime=mimeMap[fmt]||'image/jpeg';
+  setConvStatus('webp2images','Loading WebP…','info');
+  const file=files[0];
+  const baseName=file.name.replace(/\.webp$/i,'');
+  if(typeof ImageDecoder==='undefined'){
+    /* Fallback: single frame via canvas */
+    const img=await new Promise((res,rej)=>{const i=new Image();const u=URL.createObjectURL(file);i.onload=()=>{URL.revokeObjectURL(u);res(i);};i.onerror=rej;i.src=u;});
+    const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
+    const c0=canvas.getContext('2d');flatten(c0,fmt,canvas.width,canvas.height);c0.drawImage(img,0,0);
+    const blob=await canvasBlob(canvas,fmt,quality);
+    const blobUrl=URL.createObjectURL(blob);
+    convResult(resultEl,`<img src="${blobUrl}" style="max-width:100%;border-radius:5px;margin-bottom:10px;"/>`,
+      baseName+'_frame001.'+fmt,`${formatBytes(blob.size)} · ${img.naturalWidth}×${img.naturalHeight} · ${fmt.toUpperCase()} (static fallback)`,blobUrl);
+    setConvStatus('webp2images','✅ Done (1 frame — ImageDecoder not supported in this browser)','success');
+    return;
+  }
+  const buf=await file.arrayBuffer();
+  const decoder=new ImageDecoder({data:buf,type:'image/webp'});
+  await decoder.tracks.ready;
+  const total=decoder.tracks.selectedTrack.frameCount||1;
+  setConvStatus('webp2images',`0 / ${total} frames extracted…`,'info');
+  const blobs=[];
+  const canvas=document.createElement('canvas');
+  for(let i=0;i<total;i++){
+    const{image}=await decoder.decode({frameIndex:i});
+    canvas.width=image.displayWidth;canvas.height=image.displayHeight;
+    const cx=canvas.getContext('2d');flatten(cx,fmt,canvas.width,canvas.height);cx.drawImage(image,0,0);
+    try{image.close();}catch(e){}
+    const blob=await canvasBlob(canvas,fmt,quality);
+    blobs.push(blob);
+    setConvStatus('webp2images',`${i+1} / ${total} frames extracted…`,'info');
+    await new Promise(r=>setTimeout(r,0));
+  }
+  decoder.close();
+  let html=`<div class="results-meta"><span class="results-count">${blobs.length} frame${blobs.length!==1?'s':''}</span><button class="preview-all-btn" onclick="window._dlAllWebpFrames()">Download All</button></div><div class="media-grid">`;
+  const urls=[];
+  blobs.forEach((blob,i)=>{
+    const u=URL.createObjectURL(blob);urls.push(u);
+    const fn=`${baseName}_frame${String(i+1).padStart(3,'0')}.${fmt}`;
+    html+=`<div class="media-card"><img class="media-thumb" src="${u}"/><div class="media-info"><div class="media-name">${esc(fn)}</div><button class="media-dl-btn" onclick="dlBlob('${u}','${enc(fn)}')">↓ Save</button></div></div>`;
+  });
+  html+='</div>';
+  resultEl.innerHTML=html;
+  window._webpFrameBlobs=blobs.map((b,i)=>({blob:b,name:`${baseName}_frame${String(i+1).padStart(3,'0')}.${fmt}`}));
+  window._dlAllWebpFrames=function(){window._webpFrameBlobs.forEach((f,i)=>setTimeout(()=>{const u=URL.createObjectURL(f.blob);dlBlob(u,f.name);},i*200));};
+  setConvStatus('webp2images',`✅ ${blobs.length} frame${blobs.length!==1?'s':''} extracted`,'success');
+}
+
+/* ── WEBP ANIM → GIF ── */
+async function convertWebPToGif(files,resultEl){
+  if(!files||files.length===0)throw new Error('No WebP file selected. Tap the upload area first.');
+  setConvStatus('webp2gif','Loading WebP…','info');
+  const file=files[0];
+  const baseName=file.name.replace(/\.webp$/i,'');
+  const numColors=128;
+  const dither='none';
+  if(typeof ImageDecoder==='undefined'){
+    /* Fallback: single frame */
+    const img=await new Promise((res,rej)=>{const i=new Image();const u=URL.createObjectURL(file);i.onload=()=>{URL.revokeObjectURL(u);res(i);};i.onerror=rej;i.src=u;});
+    const w=img.naturalWidth,h=img.naturalHeight;
+    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+    const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);
+    const frames=[ctx.getImageData(0,0,w,h).data];
+    setConvStatus('webp2gif','Encoding GIF…','info');
+    const gifBytes=await encodeGIF(frames,w,h,100,null,numColors,dither);
+    const blob=new Blob([gifBytes],{type:'image/gif'});
+    const blobUrl=URL.createObjectURL(blob);
+    convResult(resultEl,`<img src="${blobUrl}" style="max-width:100%;border-radius:5px;margin-bottom:10px;"/>`,
+      baseName+'.gif',`${formatBytes(blob.size)} · ${w}×${h} · GIF (static fallback)`,blobUrl);
+    setConvStatus('webp2gif','✅ Done (1 frame — ImageDecoder not supported in this browser)','success');
+    return;
+  }
+  const buf=await file.arrayBuffer();
+  const decoder=new ImageDecoder({data:buf,type:'image/webp'});
+  await decoder.tracks.ready;
+  const total=decoder.tracks.selectedTrack.frameCount||1;
+  setConvStatus('webp2gif',`Decoding 0 / ${total} frames…`,'info');
+  const frames=[];
+  let w=0,h=0,totalDuration=0,sc=1;
+  const canvas=document.createElement('canvas');
+  const frameDurations=[];
+  for(let i=0;i<total;i++){
+    const result=await decoder.decode({frameIndex:i});
+    const image=result.image;
+    if(i===0){
+      /* keep total pixel count inside a memory budget */
+      if(total*image.displayWidth*image.displayHeight>40e6)sc=Math.sqrt(40e6/(total*image.displayWidth*image.displayHeight));
+      w=Math.max(2,Math.floor(image.displayWidth*sc));h=Math.max(2,Math.floor(image.displayHeight*sc));
+      canvas.width=w;canvas.height=h;
+    }
+    const cx=canvas.getContext('2d');
+    cx.fillStyle='#fff';cx.fillRect(0,0,w,h);cx.drawImage(image,0,0,w,h);
+    frames.push(cx.getImageData(0,0,w,h).data);
+    /* duration in microseconds → ms */
+    const dur=image.duration?Math.max(20,Math.round(image.duration/1000)):100;
+    try{image.close();}catch(e){}
+    frameDurations.push(dur);
+    totalDuration+=dur;
+    setConvStatus('webp2gif',`Decoded ${i+1} / ${total} frames…`,'info');
+    await new Promise(r=>setTimeout(r,0));
+  }
+  decoder.close();
+  /* Each frame keeps its own delay */
+  setConvStatus('webp2gif','Encoding GIF…','info');
+  const gifBytes=await encodeGIF(frames,w,h,frameDurations,(fi,tot)=>{
+    setConvStatus('webp2gif',`Encoding frame ${fi+1}/${tot}…`,'info');
+  },numColors,dither);
+  const blob=new Blob([gifBytes],{type:'image/gif'});
+  const blobUrl=URL.createObjectURL(blob);
+  const size=formatBytes(blob.size);
+  convResult(resultEl,`<img src="${blobUrl}" style="max-width:100%;border-radius:5px;margin-bottom:10px;"/>`,
+    baseName+'.gif',`${size} · ${w}×${h} · ${total} frames · ${(totalDuration/1000).toFixed(2)}s${sc<1?' · downscaled to fit memory':''}`,blobUrl);
+  setConvStatus('webp2gif','✅ Done — '+size,'success');
+}
+
+/* ── WEBP ANIM → VIDEO (WebM via Canvas captureStream) ── */
+async function convertWebPToVideo(files,resultEl){
+  if(!files||files.length===0)throw new Error('No WebP file selected. Tap the upload area first.');
+  setConvStatus('webp2video','Loading WebP…','info');
+  const file=files[0];
+  const baseName=file.name.replace(/\.webp$/i,'');
+  if(!window.MediaRecorder)throw new Error('MediaRecorder not supported in this browser.');
+  if(typeof ImageDecoder==='undefined'){
+    /* Fallback: static single-frame video */
+    const dur=parseFloat(convertOpts['webp2video-dur']||'2')*1000;
+    const img=await new Promise((res,rej)=>{const i=new Image();const u=URL.createObjectURL(file);i.onload=()=>{URL.revokeObjectURL(u);res(i);};i.onerror=rej;i.src=u;});
+    const w=img.naturalWidth,h=img.naturalHeight;
+    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    if(!canvas.captureStream)throw new Error('captureStream not supported in this browser.');
+    const stream=canvas.captureStream(1);
+    const chunks=[];
+    const rec=new MediaRecorder(stream,{mimeType:'video/webm'});
+    rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
+    setConvStatus('webp2video','Recording…','info');
+    await new Promise(res=>{rec.onstop=res;rec.start();setTimeout(()=>rec.stop(),dur);});
+    const blob=new Blob(chunks,{type:'video/webm'});
+    const blobUrl=URL.createObjectURL(blob);
+    convResult(resultEl,`<video src="${blobUrl}" controls style="max-width:100%;border-radius:5px;margin-bottom:10px;"></video>`,
+      baseName+'.webm',`${formatBytes(blob.size)} · ${w}×${h} · ${dur/1000}s · WebM (static fallback)`,blobUrl);
+    setConvStatus('webp2video','✅ Done (1 frame — ImageDecoder not supported in this browser)','success');
+    return;
+  }
+  const buf=await file.arrayBuffer();
+  const decoder=new ImageDecoder({data:buf,type:'image/webp'});
+  await decoder.tracks.ready;
+  const total=decoder.tracks.selectedTrack.frameCount||1;
+  setConvStatus('webp2video',`Decoding 0 / ${total} frames…`,'info');
+  /* Decode all frames + capture their durations */
+  const decodedFrames=[];
+  let w=0,h=0;
+  for(let i=0;i<total;i++){
+    const result=await decoder.decode({frameIndex:i});
+    const image=result.image;
+    w=image.displayWidth;h=image.displayHeight;
+    /* duration in microseconds → ms, default 100ms */
+    const dur=image.duration?Math.round(image.duration/1000):100;
+    decodedFrames.push({image,dur});
+    setConvStatus('webp2video',`Decoded ${i+1} / ${total} frames…`,'info');
+    await new Promise(r=>setTimeout(r,0));
+  }
+  decoder.close();
+  /* Record frames onto canvas at their natural timing */
+  const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+  const ctx=canvas.getContext('2d');
+  if(!canvas.captureStream)throw new Error('captureStream not supported in this browser.');
+  const mimeType=MediaRecorder.isTypeSupported('video/webm;codecs=vp9')?'video/webm;codecs=vp9':'video/webm';
+  const stream=canvas.captureStream(0); /* manual frame rate */
+  const chunks=[];
+  const rec=new MediaRecorder(stream,{mimeType});
+  rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
+  rec.start();
+  setConvStatus('webp2video','Recording…','info');
+  for(let i=0;i<decodedFrames.length;i++){
+    ctx.clearRect(0,0,w,h);
+    ctx.drawImage(decodedFrames[i].image,0,0,w,h);
+    stream.getVideoTracks()[0].requestFrame();
+    await new Promise(r=>setTimeout(r,decodedFrames[i].dur));
+    if(i%5===0)setConvStatus('webp2video',`Recording frame ${i+1}/${total}…`,'info');
+  }
+  /* hold the last frame so the recorder does not cut it short */
+  stream.getVideoTracks()[0].requestFrame();
+  await new Promise(r=>setTimeout(r,200));
+  decodedFrames.forEach(f=>{try{f.image.close();}catch(e){}});
+  const stopped=new Promise(r=>{rec.onstop=r;});
+  rec.stop();
+  await stopped;
+  const blob=new Blob(chunks,{type:'video/webm'});
+  const blobUrl=URL.createObjectURL(blob);
+  const size=formatBytes(blob.size);
+  const totalMs=decodedFrames.reduce((s,f)=>s+f.dur,0);
+  convResult(resultEl,`<video src="${blobUrl}" controls loop style="max-width:100%;border-radius:5px;margin-bottom:10px;"></video>`,
+    baseName+'.webm',`${size} · ${w}×${h} · ${total} frames · ${(totalMs/1000).toFixed(2)}s · WebM`,blobUrl);
+  setConvStatus('webp2video','✅ Done — '+size,'success');
+}
+
+/* ── GIF → IMAGES ── */
+async function convertGifToImages(files,resultEl){
+  if(!files||files.length===0)throw new Error('No GIF file selected. Tap the upload area first.');
+  setConvStatus('gif2images','Loading GIF…','info');
+  const file=files[0];
+  const fmt=convertOpts['gif2images-fmt']||'png';
+  const maxFrames=convertOpts['gif2images-frames']==='first'?1:convertOpts['gif2images-frames']==='10'?10:Infinity;
+  const mimeMap={png:'image/png',jpeg:'image/jpeg',webp:'image/webp'};
+  const mime=mimeMap[fmt]||'image/png';
+  /* Use ImageDecoder if available (Chrome 94+), else fall back to single-frame via canvas */
+  if(typeof ImageDecoder!=='undefined'){
+    const buf=await file.arrayBuffer();
+    const decoder=new ImageDecoder({data:buf,type:'image/gif'});
+    await decoder.tracks.ready;
+    const total=Math.min(decoder.tracks.selectedTrack.frameCount||1,maxFrames);
+    const blobs=[];
+    for(let i=0;i<total;i++){
+      setConvStatus('gif2images',`Extracting frame ${i+1}/${total}…`,'info');
+      const {image}=await decoder.decode({frameIndex:i});
+      const canvas=document.createElement('canvas');
+      canvas.width=image.displayWidth;canvas.height=image.displayHeight;
+      const cx=canvas.getContext('2d');flatten(cx,fmt,canvas.width,canvas.height);cx.drawImage(image,0,0);
+      try{image.close();}catch(e){}
+      const blob=await canvasBlob(canvas,fmt,0.92);
+      blobs.push(blob);
+    }
+    const baseName=file.name.replace(/\.gif$/i,'');
+    let html='';
+    const urls=[];
+    blobs.forEach((blob,i)=>{
+      const u=URL.createObjectURL(blob);urls.push(u);
+      const fname=`${baseName}_frame${String(i+1).padStart(3,'0')}.${fmt}`;
+      html+=`<div style="margin-bottom:10px"><img src="${u}" style="max-width:100%;border-radius:5px;display:block;margin-bottom:4px"/>
+        <button class="convert-btn" style="padding:6px 14px;font-size:12px" onclick="dlBlob('${u}','${enc(fname)}')">⬇ ${esc(fname)} (${formatBytes(blob.size)})</button></div>`;
+    });
+    resultEl.innerHTML=html;
+    setConvStatus('gif2images',`✅ ${blobs.length} frame${blobs.length>1?'s':''} extracted`,'success');
+  } else {
+    /* Fallback: draw first frame only */
+    const img=await new Promise((res,rej)=>{
+      const i=new Image();const u=URL.createObjectURL(file);
+      i.onload=()=>{URL.revokeObjectURL(u);res(i);};i.onerror=rej;i.src=u;
+    });
+    const w=img.naturalWidth,h=img.naturalHeight;
+    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+    const c1=canvas.getContext('2d');flatten(c1,fmt,w,h);c1.drawImage(img,0,0,w,h);
+    const blob=await canvasBlob(canvas,fmt,0.92);
+    const blobUrl=URL.createObjectURL(blob);
+    const fname=file.name.replace(/\.gif$/i,`_frame001.${fmt}`);
+    convResult(resultEl,`<img src="${blobUrl}" style="max-width:100%;border-radius:5px;margin-bottom:10px;"/>`,
+      fname,`${formatBytes(blob.size)} · ${w}×${h} · ${fmt.toUpperCase()} (first frame only)`,blobUrl);
+    setConvStatus('gif2images','✅ Frame extracted','success');
+  }
+}
+
+/* ── DOUBLE TAP / QUALITY POPUP ── */
+
+
+
+
+
+
+
+
+/* ── 3.3 Header / tab bar layout fit ── */
+(function(){
+  function fit(){
+    var h=document.querySelector('header'),t=document.querySelector('.tabs-wrap');
+    if(!h||!t)return;
+    var hh=h.offsetHeight;
+    t.style.top=hh+'px';
+    document.documentElement.style.setProperty('--bars-h',(hh+t.offsetHeight)+'px');
+  }
+  window.addEventListener('load',fit);
+  window.addEventListener('resize',fit);
+  window.addEventListener('orientationchange',fit);
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+  document.addEventListener('DOMContentLoaded',fit);
+  fit();
+})();
+</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</body>
+</html>
